@@ -2,6 +2,42 @@
 
 // todo namespace
 
+function Paddle(id) {
+  this.id = id;
+  this.x = -1;
+  this.y = -1;
+  this.width = 20;
+  this.height = 6;
+  this.fillStyle = 'red';
+  this.velocity = 0; // should be in pixels per second... not there yet
+}
+
+function Vector(magnitude, direction) {
+  this.magnitude = magnitude; // pixels per second
+  this.direction = direction;
+}
+
+function Ball(id, x, y) {
+  this.id = id;
+  this.x = x;
+  this.y = y;
+  this.radius = 2;
+  this.color = 'white';
+  this.v = new Vector(75, Math.PI * 0.25);
+}
+
+Ball.prototype.move = function (fps) {
+  var xd,
+    yd,
+    magnitude = this.v.magnitude / fps;
+
+  xd = Math.cos(this.v.direction) * magnitude;
+  yd = -Math.sin(this.v.direction) * magnitude;
+
+  this.x += xd;
+  this.y += yd;
+};
+
 function Engine() {
   this.paused = false;
   this.i = 0;
@@ -9,7 +45,8 @@ function Engine() {
   this.context = null;
   this.width = -1;
   this.height = -1;
-  this.interval_ms = 1000 / 50;
+  this.fps = 50;
+  this.interval_ms = 1000 / this.fps;
 
   // colors
   this.backgroundColor = '#000'; // black
@@ -17,25 +54,51 @@ function Engine() {
 
   // fonts
   this.font = '12px sans-serif';
+
+  // game object
+  this.paddle = new Paddle('paddle');
+  this.ball = null;
 }
 
 Engine.prototype.handleKeyDown = function (that, evt) {
+  var maxVelocity = 10,
+    step = 1;
+
   switch (evt.keyCode) {
 
     // Left arrow.
     case 37:
-      that.i = 0;
-      //racquetX = racquetX - 20;
-      //if (racquetX < 0) racquetX = 0;
+      if (that.paddle.velocity > -maxVelocity) {
+        // If we're going in the opposite direction slow down fast
+        if (that.paddle.velocity <= 0) {
+          that.paddle.velocity -= step;
+        } else {
+          that.paddle.velocity = 0;
+        }
+      }
       break;
 
     // Right arrow.
     case 39:
-      that.i = 100;
-      //racquetX = racquetX + 20;
-      //if (racquetX > boardX - racquetW) racquetX = boardX - racquetW;
+      if (that.paddle.velocity < maxVelocity) {
+        // If we're going in the opposite direction slow down fast
+        if (that.paddle.velocity >= 0) {
+          that.paddle.velocity += step;
+        } else {
+          that.paddle.velocity = 0;
+        }
+      }
+      break;
+
+    // down arrow.
+    case 40:
+      that.ball.move(1);
       break;
   }
+};
+
+Engine.prototype.initializeNewBall = function (x, y) {
+  this.ball = new Ball('main ball', x, y);
 };
 
 Engine.prototype.initialize = function (wnd, canvas) {
@@ -56,6 +119,11 @@ Engine.prototype.initialize = function (wnd, canvas) {
       this.width = canvas.width;
       this.height = canvas.height;
 
+      this.paddle.x = (this.width - this.paddle.width) / 2;
+      this.paddle.y = this.height - this.paddle.height - 10;
+
+      this.initializeNewBall(this.paddle.x, this.height - this.paddle.height - 10);
+
       wnd.addEventListener('keydown', function (evt) {
         that.handleKeyDown(that, evt);
       }, true);
@@ -73,6 +141,11 @@ Engine.prototype.move = function () {
   } else {
     this.i++;
   }
+  this.paddle.x += this.paddle.velocity;
+
+  // todo - collision detection
+
+  this.ball.move(this.fps);
 };
 
 Engine.prototype.clear = function () {
@@ -81,19 +154,50 @@ Engine.prototype.clear = function () {
 };
 
 Engine.prototype.drawText = function (value, x, y) {
-  this.context.fillStyle    = this.textColor;
-  this.context.font         = this.font;
+  this.context.fillStyle = this.textColor;
+  this.context.font = this.font;
   this.context.textBaseline = 'top';
 
   this.context.fillText(value, x, y);
 };
 
-Engine.prototype.draw = function () {
-
-  this.drawText('Loop counter=' + this.i, 0, 0);
+Engine.prototype.drawBall = function (ball)
+{
+  this.context.fillStyle = ball.color;
+  this.context.beginPath();
+  this.context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, true);
+  this.context.closePath();
+  this.context.fill();
 };
 
-Engine.prototype.gameLoop = function(that) {
+Engine.prototype.drawPaddle = function (paddle) {
+   this.context.fillStyle = paddle.fillStyle;
+   this.context.globalAlpha = 1.0;
+   this.context.beginPath();
+   this.context.moveTo(paddle.x, paddle.y);
+   this.context.lineTo(paddle.x + paddle.width, paddle.y);
+   this.context.lineTo(paddle.x + paddle.width, paddle.y + paddle.height);
+   this.context.lineTo(paddle.x, paddle.y + paddle.height);
+   this.context.lineTo(paddle.x, paddle.y);
+   this.context.closePath();  
+   this.context.fill();
+};
+
+Engine.prototype.draw = function () {
+
+  this.drawText('i=' + this.i + 
+    ' velocity=' + this.paddle.velocity + 
+    ' ball: ' +
+    ' x=' + this.ball.x + 
+    ' y=' + this.ball.y + 
+    ' d=' + this.ball.v.direction / Math.PI + 
+    ' v=' + this.ball.v.magnitude, 0, 0);
+
+  this.drawPaddle(this.paddle);
+  this.drawBall(this.ball);
+};
+
+Engine.prototype.gameLoop = function (that) {
   that.move();
   that.clear();
   that.draw();
@@ -102,14 +206,12 @@ Engine.prototype.gameLoop = function(that) {
   }, this.interval_ms);
 };
 
-var engine = new Engine();
-engine.initialize(window, document.getElementById('myCanvas'));
-engine.gameLoop(engine);
+(function () {
+  var engine = new Engine();
+  engine.initialize(window, document.getElementById('myCanvas'));
+  engine.gameLoop(engine);
+})();
 
-// // Set the style properties.
-// context.fillStyle   = '#00f';
-// context.strokeStyle = '#f00';
-// context.lineWidth   = 4;
 
 // context.beginPath();
 // // Start from the top-left point.
