@@ -1,32 +1,100 @@
  "use strict"
 
+// todo namespace
 
+function Engine() {
+  this.paused = false;
+  this.i = 0;
+  this.canvas = null;
+  this.context = null;
+  this.width = -1;
+  this.height = -1;
 
-  var i = 0,
-    paused = false;
+  // colors
+  this.backgroundColor = '#000'; // black
+}
 
+Engine.prototype.HandleKeyDown = function (that, evt) {
+  switch (evt.keyCode) {
 
-// Get a reference to the element.
-var elem = document.getElementById('myCanvas');
+    // Left arrow.
+    case 37:
+      that.i = 0;
+      //racquetX = racquetX - 20;
+      //if (racquetX < 0) racquetX = 0;
+      break;
 
-// Always check for properties and methods, to make sure your code doesn't break 
-// in other browsers.
-if (elem && elem.getContext) {
+    // Right arrow.
+    case 39:
+      that.i = 100;
+      //racquetX = racquetX + 20;
+      //if (racquetX > boardX - racquetW) racquetX = boardX - racquetW;
+      break;
+  }
+};
 
-  // Get the 2d context.
-  // Remember: you can only initialize one context per element.
-  var context = elem.getContext('2d');
-  if (context) {
-    // You are done! Now you can draw your first rectangle.
-    // You only need to provide the (x,y) coordinates, followed by the width and 
-    // height dimensions.
+Engine.prototype.Initialize = function (wnd, canvas) {
+  var that = this;
 
+  if (wnd === null) {
+    // todo throw exception
+    throw 'window element required'
+  }
 
-    // Draw some rectangles.
-    // context.fillRect  (0,   0, 150, 50);
-    // context.strokeRect(0,  60, 150, 50);
-    // context.clearRect (30, 25,  90, 60);
-    // context.strokeRect(30, 25,  90, 60);
+  if (canvas) {
+    this.canvas = canvas;
+    this.context = canvas.getContext('2d');
+  }
+
+  if (this.canvas) {
+    if (this.context) {
+      this.width = canvas.width;
+      this.height = canvas.height;
+
+      wnd.addEventListener('keydown', function (evt) {
+        that.HandleKeyDown(that, evt);
+      }, true);
+    } else {
+      throw 'browser does not support 2d canvas'
+    }
+  } else {
+      throw 'canvas element required'
+  }
+};
+
+Engine.prototype.Move = function () {
+  this.i++;
+};
+
+Engine.prototype.Clear = function () {
+  this.context.fillStyle   = this.backgroundColor;
+  this.context.fillRect(0, 0, this.width, this.height);
+};
+
+Engine.prototype.Draw = function () {
+
+  this.context.fillStyle   = '#00f'; // blue
+  this.context.strokeStyle = '#f00'; // red
+  this.context.lineWidth   = 4;      
+
+  this.context.fillStyle    = '#00f';
+  this.context.font         = 'italic 30px sans-serif';
+  this.context.textBaseline = 'top';
+  this.context.fillText('Loop counter=' + this.i, 0, 0);
+};
+
+Engine.prototype.GameLoop = function(that) {
+  that.Move();
+  that.Clear();
+  that.Draw();
+  var gLoop = setTimeout(function () { 
+    that.GameLoop(that);
+  }, 1000 / 50);
+};
+
+var engine = new Engine();
+engine.Initialize(window, document.getElementById('myCanvas'));
+engine.GameLoop(engine);
 
 // // Set the style properties.
 // context.fillStyle   = '#00f';
@@ -48,79 +116,23 @@ if (elem && elem.getContext) {
 
 
 
-  // // You need to provide the source and destination (x,y) coordinates 
-  // // for the gradient (from where it starts and where it ends).
-  // var gradient1 = context.createLinearGradient(150, 10, 50, 50);
+// // You need to provide the source and destination (x,y) coordinates 
+// // for the gradient (from where it starts and where it ends).
+// var gradient1 = context.createLinearGradient(150, 10, 50, 50);
 
-  // // Now you can add colors in your gradient.
-  // // The first argument tells the position for the color in your gradient. The 
-  // // accepted value range is from 0 (gradient start) to 1 (gradient end).
-  // // The second argument tells the color you want, using the CSS color format.
-  // gradient1.addColorStop(0,   '#f00'); // red
-  // gradient1.addColorStop(0.5, '#ff0'); // yellow
-  // gradient1.addColorStop(1,   '#00f'); // blue
+// // Now you can add colors in your gradient.
+// // The first argument tells the position for the color in your gradient. The 
+// // accepted value range is from 0 (gradient start) to 1 (gradient end).
+// // The second argument tells the color you want, using the CSS color format.
+// gradient1.addColorStop(0,   '#f00'); // red
+// gradient1.addColorStop(0.5, '#ff0'); // yellow
+// gradient1.addColorStop(1,   '#00f'); // blue
 
-  // // For the radial gradient you also need to provide source
-  // // and destination circle radius.
-  // // The (x,y) coordinates define the circle center points (start and 
-  // // destination).
-  // var gradient2 = context.createRadialGradient(sx, sy, sr, dx, dy, dr);
+// // For the radial gradient you also need to provide source
+// // and destination circle radius.
+// // The (x,y) coordinates define the circle center points (start and 
+// // destination).
+// var gradient2 = context.createRadialGradient(sx, sy, sr, dx, dy, dr);
 
-  // // Adding colors to a radial gradient is the same as adding colors to linear 
-  // // gradients.
-
-    var HandleKeyDown = function (evt) {
-      switch (evt.keyCode) {
-
-      // Left arrow.
-      case 37:
-        i = 0;
-        //racquetX = racquetX - 20;
-        //if (racquetX < 0) racquetX = 0;
-        break;
-
-      // Right arrow.
-      case 39:
-        i = 100;
-        //racquetX = racquetX + 20;
-        //if (racquetX > boardX - racquetW) racquetX = boardX - racquetW;
-        break;
-      }
-    }  
-
-
-    var Move = function () {
-      i++;
-    };
-    var gLoop;
-
-    var Clear = function () {
-      context.fillStyle   = '#000'; // blue
-      context.fillRect(0, 0, 450, 300);
-    };
-
-    var Draw = function () {
-
-      context.fillStyle   = '#00f'; // blue
-      context.strokeStyle = '#f00'; // red
-      context.lineWidth   = 4;      
-
-      context.fillStyle    = '#00f';
-      context.font         = 'italic 30px sans-serif';
-      context.textBaseline = 'top';
-      context.fillText('Loop counter=' + i, 0, 0);
-    };
-
-
-    var GameLoop = function(){  
-      Clear();  
-      Move();
-      Draw();
-      gLoop = setTimeout(GameLoop, 1000 / 50);
-    };
-
-
-    window.addEventListener('keydown', HandleKeyDown, true);
-    GameLoop(); 
-  }
-}
+// // Adding colors to a radial gradient is the same as adding colors to linear 
+// // gradients.
