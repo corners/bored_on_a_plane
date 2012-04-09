@@ -9,12 +9,17 @@ function Engine() {
   this.context = null;
   this.width = -1;
   this.height = -1;
+  this.interval_ms = 1000 / 50;
 
   // colors
   this.backgroundColor = '#000'; // black
+  this.textColor = '#fff';
+
+  // fonts
+  this.font = '12px sans-serif';
 }
 
-Engine.prototype.HandleKeyDown = function (that, evt) {
+Engine.prototype.handleKeyDown = function (that, evt) {
   switch (evt.keyCode) {
 
     // Left arrow.
@@ -33,7 +38,7 @@ Engine.prototype.HandleKeyDown = function (that, evt) {
   }
 };
 
-Engine.prototype.Initialize = function (wnd, canvas) {
+Engine.prototype.initialize = function (wnd, canvas) {
   var that = this;
 
   if (wnd === null) {
@@ -52,7 +57,7 @@ Engine.prototype.Initialize = function (wnd, canvas) {
       this.height = canvas.height;
 
       wnd.addEventListener('keydown', function (evt) {
-        that.HandleKeyDown(that, evt);
+        that.handleKeyDown(that, evt);
       }, true);
     } else {
       throw 'browser does not support 2d canvas'
@@ -62,39 +67,44 @@ Engine.prototype.Initialize = function (wnd, canvas) {
   }
 };
 
-Engine.prototype.Move = function () {
-  this.i++;
+Engine.prototype.move = function () {
+  if (this.i === 65535) {
+    this.i = 0;
+  } else {
+    this.i++;
+  }
 };
 
-Engine.prototype.Clear = function () {
+Engine.prototype.clear = function () {
   this.context.fillStyle   = this.backgroundColor;
   this.context.fillRect(0, 0, this.width, this.height);
 };
 
-Engine.prototype.Draw = function () {
-
-  this.context.fillStyle   = '#00f'; // blue
-  this.context.strokeStyle = '#f00'; // red
-  this.context.lineWidth   = 4;      
-
-  this.context.fillStyle    = '#00f';
-  this.context.font         = 'italic 30px sans-serif';
+Engine.prototype.drawText = function (value, x, y) {
+  this.context.fillStyle    = this.textColor;
+  this.context.font         = this.font;
   this.context.textBaseline = 'top';
-  this.context.fillText('Loop counter=' + this.i, 0, 0);
+
+  this.context.fillText(value, x, y);
 };
 
-Engine.prototype.GameLoop = function(that) {
-  that.Move();
-  that.Clear();
-  that.Draw();
+Engine.prototype.draw = function () {
+
+  this.drawText('Loop counter=' + this.i, 0, 0);
+};
+
+Engine.prototype.gameLoop = function(that) {
+  that.move();
+  that.clear();
+  that.draw();
   var gLoop = setTimeout(function () { 
-    that.GameLoop(that);
-  }, 1000 / 50);
+    that.gameLoop(that);
+  }, this.interval_ms);
 };
 
 var engine = new Engine();
-engine.Initialize(window, document.getElementById('myCanvas'));
-engine.GameLoop(engine);
+engine.initialize(window, document.getElementById('myCanvas'));
+engine.gameLoop(engine);
 
 // // Set the style properties.
 // context.fillStyle   = '#00f';
