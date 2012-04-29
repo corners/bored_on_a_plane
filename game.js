@@ -1,6 +1,8 @@
- "use strict"
+"use strict";
 
 // todo namespace
+
+
 
 function Paddle(id) {
   this.id = id;
@@ -12,9 +14,17 @@ function Paddle(id) {
   this.velocity = 0; // should be in pixels per second... not there yet
 }
 
+// returns true if point (x, y) inside box (x,y,width,height).
+function hitTest(pt, box) {
+  return (pt.x >= box.x && 
+    pt.x <= box.x + box.width && 
+    pt.y >= box.y && 
+    pt.y <= box.y + box.height);
+}
+
 function Vector(magnitude, direction) {
   this.magnitude = magnitude; // pixels per second
-  this.direction = direction;
+  this.direction = direction; // angle in radians
 }
 
 function Ball(id, x, y) {
@@ -25,6 +35,15 @@ function Ball(id, x, y) {
   this.color = 'white';
   this.v = new Vector(75, Math.PI * 0.25);
 }
+
+Ball.prototype.boundingBox = function () {  
+  return {
+    x1: this.x - this.radius,
+    y1: this.y - this.radius,
+    x2: this.x + this.radius,
+    y2: this.y + this.radius
+  };
+};
 
 Ball.prototype.move = function (fps) {
   var xd,
@@ -58,46 +77,44 @@ function Engine() {
   // game object
   this.paddle = new Paddle('paddle');
   this.ball = null;
+  
+  // input
+  this.velocityInput = 0; // amount to adjust paddle velocity. left < 0. right > 0
+  
+  // dashboard
+  this.message = '';
+  
+  
+  this.paused = false;
 }
 
+Engine.prototype.togglePause = function () {
+  this.paused = !this.paused;
+};
+
+Engine.prototype.moveLeft = function () {
+  this.velocityInput -= 1;
+};
+
+Engine.prototype.moveRight = function () {
+  this.velocityInput += 1;
+};
+
 Engine.prototype.handleKeyDown = function (that, evt) {
-  var maxVelocity = 10,
-    step = 1;
-
   switch (evt.keyCode) {
-
     // Left arrow.
     case 37:
-      if (that.paddle.velocity > -maxVelocity) {
-        // If we're going in the opposite direction slow down fast
-        if (that.paddle.velocity <= 0) {
-          that.paddle.velocity -= step;
-        } else {
-          that.paddle.velocity = 0;
-        }
-      }
+      that.moveLeft();
       break;
 
     // Right arrow.
     case 39:
-      if (that.paddle.velocity < maxVelocity) {
-        // If we're going in the opposite direction slow down fast
-        if (that.paddle.velocity >= 0) {
-          that.paddle.velocity += step;
-        } else {
-          that.paddle.velocity = 0;
-        }
-      }
-      break;
-
-    // down arrow.
-    case 40:
-      that.ball.move(1);
+      that.moveRight();
       break;
   }
 };
 
-Engine.prototype.initializeNewBall = function (x, y) {
+Engine.prototype.initializeNewBall = function (x, y){
   this.ball = new Ball('main ball', x, y);
 };
 
@@ -106,7 +123,7 @@ Engine.prototype.initialize = function (wnd, canvas) {
 
   if (wnd === null) {
     // todo throw exception
-    throw 'window element required'
+    throw 'window element required';
   }
 
   if (canvas) {
@@ -128,14 +145,53 @@ Engine.prototype.initialize = function (wnd, canvas) {
         that.handleKeyDown(that, evt);
       }, true);
     } else {
-      throw 'browser does not support 2d canvas'
+      throw 'browser does not support 2d canvas';
     }
   } else {
-      throw 'canvas element required'
+      throw 'canvas element required';
   }
 };
 
+Engine.prototype.handleAction = function () {
+  var maxVelocity = 10,
+    step = 1;
+
+  if (this.paused) {
+    this.message = 'paused';
+  } else {
+    this.message = '';
+  }
+
+  if (this.velocityInput < 0) {
+    // paddle left
+    if (this.paddle.velocity <= 0) {
+      this.paddle.velocity += this.velocityInput;
+    } else {
+      // If we're going in the opposite direction slow down fast
+      this.paddle.velocity = 0;
+    }
+    if (this.paddle.velocity < -maxVelocity) {
+      this.paddle.velocity = -maxVelocity;
+    }
+  } else if (this.velocityInput > 0) {   
+    // paddle right
+    if (this.paddle.velocity >= 0) {
+       this.paddle.velocity += this.velocityInput;
+    } else {
+      // If we're going in the opposite direction slow down fast
+      this.paddle.velocity = 0;
+    }
+    if (this.paddle.velocity > maxVelocity) {
+      this.paddle.velocity = maxVelocity;     
+    }
+  }
+  
+  this.velocityInput = 0;
+};
+
 Engine.prototype.move = function () {
+  var box;
+
   if (this.i === 65535) {
     this.i = 0;
   } else {
@@ -143,8 +199,35 @@ Engine.prototype.move = function () {
   }
   this.paddle.x += this.paddle.velocity;
 
-  // todo - collision detection
+  // collision detection
+  // ball on wall
+  box = this.ball.boundingBox();
+  if (box.x2 >= this.width) {
+  	this.ball.v.direction += 0.5 * Math.PI;
+  } else if (box.x1 <= 0) {
+  	this.ball.v.direction -= 0.5 * Math.PI;
+  } else if (box.y2 >= this.height) {
+  	this.ball.v.direction += 0.5 * Math.PI;
+  } else if (box.y1 <= 0) {
+  	this.ball.v.direction -= 0.5 * Math.PI;
+  }
 
+  // paddle on wall
+  if (this.paddle.x <= 0) {
+    this.paddle.x = 0;
+    this.paddle.velocity = 0;
+  } else if (this.paddle.x + this.paddle.width >= this.width) {
+    this.paddle.x = this.width - this.paddle.width;
+    this.paddle.velocity = 0;
+  }
+  
+  // ball on paddle
+  if (hitTest(this.ball, this.paddle)) {
+    this.message = 'strike';
+  } else {
+    this.message = '';
+  }
+  
   this.ball.move(this.fps);
 };
 
@@ -189,16 +272,24 @@ Engine.prototype.draw = function () {
     ' velocity=' + this.paddle.velocity + 
     ' ball: ' +
     ' x=' + this.ball.x + 
-    ' y=' + this.ball.y + 
-    ' d=' + this.ball.v.direction / Math.PI + 
-    ' v=' + this.ball.v.magnitude, 0, 0);
+    ' y=' + this.ball.y, 0, 0);
+   this.drawText(' d=' + this.ball.v.direction / Math.PI + 
+    ' v=' + this.ball.v.magnitude, 0, 12);
+    
+  if (this.message !== '') {
+    // todo centre and prettify
+    this.drawText(this.message, 0, 36);
+  }
 
   this.drawPaddle(this.paddle);
   this.drawBall(this.ball);
 };
 
 Engine.prototype.gameLoop = function (that) {
-  that.move();
+  that.handleAction();
+  if (!that.paused) {
+    that.move();
+  }
   that.clear();
   that.draw();
   var gLoop = setTimeout(function () { 
@@ -207,9 +298,34 @@ Engine.prototype.gameLoop = function (that) {
 };
 
 (function () {
-  var engine = new Engine();
-  engine.initialize(window, document.getElementById('myCanvas'));
+  var engine = new Engine(),
+    canvasElem = document.getElementById('myCanvas');
+    
+  engine.initialize(window, canvasElem);
   engine.gameLoop(engine);
+  
+  var elem = document.getElementById('moveLeft');
+  elem.onclick = function () {
+  	engine.moveLeft();
+  };
+  elem = document.getElementById('moveRight');
+  elem.onclick = function () {
+    engine.moveRight();
+  };
+  elem = document.getElementById('pause');
+  elem.onclick = function () {
+    engine.togglePause();
+  };
+
+
+  canvasElem.onclick = function (evt) {
+    var half = engine.width * 0.5;
+    if (evt.x < half) {
+      engine.moveLeft();
+    } else {
+      engine.moveRight();
+    }
+  };
 })();
 
 

@@ -8,12 +8,17 @@
   <header>
   </header>
   <div role="main">
-<canvas id="myCanvas" width="300" height="300">
-Fallback content, in case the browser does not support Canvas.
+<canvas id="myCanvas" width="500" height="500">
+Fallback content for those not using canvas
 </canvas>
   </div>
   <footer>
-
+<input type="button" id="moveLeft" value="left" />
+<input type="button" id="moveRight" value="right" />
+<input type="button" id="pause" value="pause" />
+	<p id='error'>
+		error goes here
+	</p>
   </footer>
 
   <script src="game.js">
