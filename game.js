@@ -23,6 +23,20 @@ function Vector(magnitude, direction) {
     this.direction = direction; // angle in radians
 }
 
+function Block(id, x, y, width, height, fixed) {
+	this.id = id;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.fixed = fixed;
+	this.fillStyle = (fixed) ? 'blue' : 'orange';
+}
+
+Block.prototype.clone = function () {
+	return new Block(this.id, this.x, this.y, this.width, this.height, this.fixed);
+};
+
 function Ball(id, x, y) {
     this.id = id;
     this.x = x;
@@ -51,7 +65,7 @@ Ball.prototype.move = function (fps) {
     this.y += yd;
 };
 
-function Engine() {
+function Engine(blocks) {
     this.paused = false;
     this.i = 0;
     this.canvas = null;
@@ -79,6 +93,9 @@ function Engine() {
     this.message = '';
 
     this.gameState = 0;
+
+	this.blocks = blocks;
+	this.entities = [ ];
 }
 
 Engine.GAMEOVER = 0;
@@ -86,6 +103,8 @@ Engine.INGAME = 1;
 Engine.PAUSED = 3;
 
 Engine.prototype.startGame = function () {
+	var i;
+
     // game object
     this.paddle = new Paddle('paddle');
     this.paddle.x = (this.width - this.paddle.width) / 2;
@@ -101,6 +120,11 @@ Engine.prototype.startGame = function () {
     this.message = '';
 
     this.gameState = Engine.INGAME;
+
+	this.entities = [ ];
+	for (i = 0; i < this.blocks.length; i += 1) {
+		this.entities.push(this.blocks[i].clone());
+	}
 };
 
 Engine.prototype.pressButton1 = function () {
@@ -214,7 +238,9 @@ Engine.prototype.logic = function () {
 };
 
 Engine.prototype.move = function () {
-    var box;
+    var box,
+		i,
+		block;
 
     if (this.i === 65535) {
         this.i = 0;
@@ -234,6 +260,11 @@ Engine.prototype.move = function () {
     } else if (box.y1 <= 0) {
         this.ball.v.direction -= 0.5 * Math.PI;
     }
+
+	for (i = 0; i < this.entities.length; i += 1) {
+		block = this.entities[i];
+		// test block collisions
+	}
 
     // ball on paddle
     if (box.y2 >= this.paddle.y && box.x1 >= this.paddle.x && box.x2 <= this.paddle.x + this.paddle.width) {
@@ -290,23 +321,34 @@ Engine.prototype.drawBall = function (ball) {
     }
 };
 
+Engine.prototype.drawRect = function (obj) {
+	this.context.fillStyle = obj.fillStyle;
+	this.context.globalAlpha = 1.0;
+	this.context.beginPath();
+	this.context.moveTo(obj.x, obj.y);
+	this.context.lineTo(obj.x + obj.width, obj.y);
+	this.context.lineTo(obj.x + obj.width, obj.y + obj.height);
+	this.context.lineTo(obj.x, obj.y + obj.height);
+	this.context.lineTo(obj.x, obj.y);
+	this.context.closePath();
+	this.context.fill();
+};
+
+
+Engine.prototype.drawBlock = function (block) {
+	this.drawRect(block);
+};
+
 Engine.prototype.drawPaddle = function (paddle) {
     if (paddle !== null) {
-        this.context.fillStyle = paddle.fillStyle;
-        this.context.globalAlpha = 1.0;
-        this.context.beginPath();
-        this.context.moveTo(paddle.x, paddle.y);
-        this.context.lineTo(paddle.x + paddle.width, paddle.y);
-        this.context.lineTo(paddle.x + paddle.width, paddle.y + paddle.height);
-        this.context.lineTo(paddle.x, paddle.y + paddle.height);
-        this.context.lineTo(paddle.x, paddle.y);
-        this.context.closePath();
-        this.context.fill();
+		this.drawRect(paddle);
     }
 };
 
 Engine.prototype.draw = function () {
-    if (this.gameState === Engine.INGAME) {
+    var i;
+
+	if (this.gameState === Engine.INGAME) {
         this.drawText('i=' + this.i + ' velocity=' + this.paddle.velocity + ' ball: ' + ' x=' + this.ball.x + ' y=' + this.ball.y, 0, 0);
         this.drawText(' d=' + this.ball.v.direction / Math.PI + ' v=' + this.ball.v.magnitude, 0, 12);
     }
@@ -317,6 +359,10 @@ Engine.prototype.draw = function () {
 
     this.drawPaddle(this.paddle);
     this.drawBall(this.ball);
+
+	for (i = 0; i < this.entities.length; i += 1) {
+		this.drawBlock(this.entities[i]);
+	}
 };
 
 Engine.prototype.gameLoop = function (that) {
@@ -332,14 +378,25 @@ Engine.prototype.gameLoop = function (that) {
     }, this.interval_ms);
 };
 
-(function () {
-    var engine = new Engine(),
-        canvasElem = document.getElementById('myCanvas');
+(function (window, document) {
+    var blocks,
+		engine,
+        canvasElem = document.getElementById('myCanvas'),
+		elem;
+
+	blocks = [
+		new Block(1, 30, 30, 20, 40, true),
+		new Block(2, 130, 130, 20, 6, false),
+		new Block(3, 200, 200, 14, 6, false)
+
+	];
+
+	engine = new Engine(blocks);
 
     engine.initialize(window, canvasElem);
     engine.gameLoop(engine);
 
-    var elem = document.getElementById('moveLeft');
+    elem = document.getElementById('moveLeft');
     elem.onclick = function () {
         engine.moveLeft();
     };
@@ -361,4 +418,5 @@ Engine.prototype.gameLoop = function (that) {
             engine.moveRight();
         }
     };
-})();
+})(window, window.document);
+
