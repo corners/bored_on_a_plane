@@ -1,0 +1,4 @@
+- rationalise jslint code
+- split jslint and firebug into textastic template
+- add jasmine for testing
+- add landing page to automatically run js files through jslint and maybe run tests or make jslint a test
