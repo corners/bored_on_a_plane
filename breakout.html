@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html debug=true lang="en">
 <head>
   <meta charset="utf-8">
   <title></title>
@@ -8,13 +8,16 @@
   <header>
   </header>
   <div role="main">
-<canvas id="myCanvas" width="300" height="300">
+<canvas id="myCanvas" width="400px" height="400px">
 Fallback content for those not using canvas
 </canvas>
   </div>
-  <footer>
-<input type="button" id="moveLeft" value="left" />
-<input type="button" id="moveRight" value="right" />
+  <footer style="width=100%;">
+  <div style="background-color:red;width:300px;">
+<input type="button" id="moveLeft" value="left" style="width:49%;border:0;padding:0;" />
+<input type="button" id="moveRight" value="right" style="width:49%;border:0;padding:0;"/>
+</div>
+<br/>
 <input type="button" id="button1" value="button1" />
 	<p id='error'>
 		error goes here
@@ -23,7 +26,10 @@ Fallback content for those not using canvas
 		test results go here
 	</p>
   </footer>
-
+  
+  <script type="text/javascript" src="firebug-lite.js">
+  </script>
+  
   <script src="vector.js">
   </script>
 
