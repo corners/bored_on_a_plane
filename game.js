@@ -25,23 +25,18 @@
 
 	function Ball(id, x, y) {
 	  this.id = id;
-	  this.position = new Vector(100, 100);
-	  this.velocity = new Vector(1, 1);
-	  this.radius = 2;
+	  this.position = new Vector(150, 100);
+	  this.velocity = new Vector(0, 8);
+	  this.radius = 1;
 	  this.color = 'white';
 	}
 
 	Ball.prototype.boundingBox = function () {
-	  return {
-		x1: this.position.x - this.radius,
-		y1: this.position.y - this.radius,
-		x2: this.position.x + this.radius,
-		y2: this.position.y + this.radius
-	  };
+	  return new Box(this.position.x - this.radius, this.position.y - this.radius, this.position.x + this.radius, this.position.y + this.radius);
 	};
 
 	Ball.prototype.move = function () {
-	  this.position = this.position.add(this.velocity);
+	  return this.position.add(this.velocity);
 	};
 
 	function Engine() {
@@ -51,7 +46,7 @@
 	  this.context = null;
 	  this.width = -1;
 	  this.height = -1;
-	  this.fps = 50;
+	  this.fps = 1;
 	  this.interval_ms = 1000 / this.fps;
 
 	  // colors
@@ -72,10 +67,10 @@
 	  this.message = '';
 
 	  this.lines = [
-		  new Line(100, 200, 200, 100),
-	      new Line(300, 300, 200, 400),
-		  new Line(400, 400, 300, 300),
-		  new Line(100, 400, 200, 325)
+		  new Line(100, 100, 200, 100),
+	    new Line(100, 200, 200, 200)//,
+//		  new Line(400, 400, 300, 300),
+//		  new Line(100, 400, 200, 325)
 	  ];
 
 	  this.gameState = 0;
@@ -86,6 +81,8 @@
 	Engine.PAUSED = 3;
 
 	Engine.prototype.startGame = function () {
+	  this.gameBox = new Box(0, 0, this.width, this.height);
+
 	  // game object
 	  this.paddle = new Paddle('paddle');
 	  this.paddle.x = (this.width - this.paddle.width) / 2;
@@ -139,26 +136,26 @@
 	  var that = this;
 
 	  if (wnd === null) {
-		// todo throw exception
-		throw 'window element required';
+  		// todo throw exception
+	  	throw 'window element required';
 	  }
 
 	  if (canvas) {
-		this.canvas = canvas;
-		this.context = canvas.getContext('2d');
+  		this.canvas = canvas;
+	  	this.context = canvas.getContext('2d');
 	  }
 
 	  if (this.canvas) {
-		if (this.context) {
-		  this.width = canvas.width;
-		  this.height = canvas.height;
+	  	if (this.context) {
+  		  this.width = canvas.width;
+		    this.height = canvas.height;
 
-		  wnd.addEventListener('keydown', function (evt) {
-			that.handleKeyDown(that, evt);
-		  }, true);
-		} else {
-		  throw 'browser does not support 2d canvas';
-		}
+  		  wnd.addEventListener('keydown', function (evt) {
+	  	  	that.handleKeyDown(that, evt);
+		    }, true);
+  		} else {
+  		  throw 'browser does not support 2d canvas';
+	  	}
 	  } else {
 		  throw 'canvas element required';
 	  }
@@ -171,27 +168,27 @@
 		step = 1;
 
 	  if (this.velocityInput < 0) {
-		// paddle left
-		if (this.paddle.velocity <= 0) {
-		  this.paddle.velocity += this.velocityInput;
-		} else {
-		  // If we're going in the opposite direction slow down fast
-		  this.paddle.velocity = 0;
-		}
-		if (this.paddle.velocity < -maxVelocity) {
-		  this.paddle.velocity = -maxVelocity;
-		}
+  		// paddle left
+  		if (this.paddle.velocity <= 0) {
+	  	  this.paddle.velocity += this.velocityInput;
+		  } else {
+  		  // If we're going in the opposite direction slow down fast
+	  	  this.paddle.velocity = 0;
+		  }
+  		if (this.paddle.velocity < -maxVelocity) {
+  		  this.paddle.velocity = -maxVelocity;
+  		}
 	  } else if (this.velocityInput > 0) {
-		// paddle right
-		if (this.paddle.velocity >= 0) {
-		   this.paddle.velocity += this.velocityInput;
-		} else {
-		  // If we're going in the opposite direction slow down fast
-		  this.paddle.velocity = 0;
-		}
-		if (this.paddle.velocity > maxVelocity) {
-		  this.paddle.velocity = maxVelocity;
-		}
+	  	// paddle right
+		  if (this.paddle.velocity >= 0) {
+		     this.paddle.velocity += this.velocityInput;
+	  	} else {
+		    // If we're going in the opposite direction slow down fast
+		    this.paddle.velocity = 0;
+		  }
+		  if (this.paddle.velocity > maxVelocity) {
+		    this.paddle.velocity = maxVelocity;
+		  }
 	  }
 
 	  this.velocityInput = 0;
@@ -201,75 +198,72 @@
 	  var box;
 
 	  if (this.gameState === Engine.INGAME) {
-		// game logic
-		box = this.ball.boundingBox();
-		if (box.y2 >= this.height) {
-		  this.gameState = Engine.GAMEOVER;
-		}
+  		// game logic
+  		box = this.ball.boundingBox();
+	  	if (!box.inside(this.gameBox)) {
+  		  this.gameState = Engine.GAMEOVER;
+  		}
 	  } else if (this.gameState === Engine.PAUSED) {
-		this.message = 'paused';
+  		this.message = 'paused';
 	  } else if (this.gameState === Engine.GAMEOVER) {
-		this.message = 'game over press button1 to play again';
+  		this.message = 'game over press button1 to play again';
 	  }
 	};
 
 	Engine.prototype.move = function () {
 	  var box,
-		  old,
-		  ballPath,
-		  line;
+	    line;
 
 	  if (this.i === 65535) {
-		this.i = 0;
+	  	this.i = 0;
 	  } else {
-		this.i += 1;
+		  this.i += 1;
 	  }
 
 	  this.paddle.x += this.paddle.velocity;
 
-	  old = new Vector(this.ball.position.x,this.ball.position.y);
-	  this.ball.move();
-	  ballPath = new Line(old.x, old.y, this.ball.position.x, this.ball.position.y);
+	  var b0 = this.ball.position,
+	    b1 = this.ball.move(),
+	    bline = new Line(b0.x, b0.y, b1.x, b1.y),
+	    rline,
+	    newv = this.ball.velocity.clone();
 
 	  // collision detection
-
-	  // ball on wall
-	  box = this.ball.boundingBox();
-	  if (box.x2 >= this.width || box.x1 <= 0) {
-		this.ball.velocity.x *= -1;
-	  } else if (box.y1 <= 0 || box.y2 >= this.height - 10) {
-		this.ball.velocity.y *= -1;
-	  }
+    // todo properly
+	  var walls = [
+	    // top
+	    new Line(0, 0, this.width, 0),
+      // bottom
+	    new Line(0, this.height - 11, this.width, this.height - 11),
+	    // left
+	    new Line(1, 0, 1, this.height),
+	    // right
+	    new Line(this.width, 0, this.width, this.height),
+	  ];
+	  for (var i = 0; i < walls.length; i++) {
+		  line = walls[i];
+		  rline = line.bounceWithRadius(bline);
+		  if (rline !== null) {
+		    bline = rline;
+// todo if we end on the line then do not calculate the new velocity
+		    newv = line.velocityReflect(newv);
+		  }
+    }
 
 	  // ball on lines
 	  for (var i = 0; i < this.lines.length; i++) {
 		  line = this.lines[i];
-		  if (Line.intersects(line, ballPath)) {
-			  var unitNormal = line.vector().getUnitNormal();
-			  var p = Vector.reflect(ballPath.pt2, unitNormal);
-			  this.ball.position = p;
-			  this.ball.velocity = new Vector(0, 0);
+		  rline = line.bounceWithRadius(bline);
+		  if (rline !== null) {
+		    this.message = 'colision';
+		    bline = rline;
+		    newv = line.velocityReflect(newv);
 		  }
-	  }
+		  else { this.message = ''; }
+    }
 
-	  // ball on paddle
-	  if (box.y2 >= this.paddle.y &&
-		box.x1 >= this.paddle.x &&
-		box.x2 <= this.paddle.x + this.paddle.width) {
-		this.message = 'strike';
-	  } else {
-		this.message = '';
-	  }
-
-	  // paddle on wall
-	  if (this.paddle.x <= 0) {
-		this.paddle.x = 0;
-		this.paddle.velocity = 0;
-	  } else if (this.paddle.x + this.paddle.width >= this.width) {
-		this.paddle.x = this.width - this.paddle.width;
-		this.paddle.velocity = 0;
-	  }
-
+    this.ball.position = bline.p1.toFixed(0);
+    this.ball.velocity = newv.toFixed(0);
 	};
 
 	Engine.prototype.clear = function () {
@@ -327,9 +321,9 @@
 	Engine.prototype.drawLine = function (line) {
 		if (line !== null) {
 			this.context.beginPath();
-			this.context.moveTo(line.pt1.x, line.pt1.y);
-			this.context.lineTo(line.pt2.x, line.pt2.y);
-			this.context.lineWidth = 1;
+			this.context.moveTo(line.p0.x, line.p0.y);
+			this.context.lineTo(line.p1.x, line.p1.y);
+			this.context.lineWidth = line.width;
 			this.context.strokeStyle = line.strokeStyle;
 			this.context.stroke();
 		}
@@ -344,11 +338,13 @@
 		  ' y=' + this.ball.position.y, 0, 0);
 		 this.drawText(' v.x=' + this.ball.velocity.x +
 		  ' v.y=' + this.ball.velocity.y, 0, 12);
+	 } else if (this.ball !== null && this.ball.position !== null) {
+	   this.drawText('ball: x=' + this.ball.position.x + ' y=' + this.ball.position.y, 0, 0);
 	 }
 	  if (this.message !== '') {
-		// todo prettify
-		this.drawCenteredText(this.message, 0, this.width, 36);
-	  }
+	  	// todo prettify
+		  this.drawCenteredText(this.message, 0, this.width, 36);
+  	}
 
 	  this.drawPaddle(this.paddle);
 	  this.drawBall(this.ball);
@@ -361,15 +357,17 @@
 	  that.handleAction();
 	  that.logic();
 	  if (this.gameState === Engine.INGAME) {
-		that.move();
+	  	that.move();
 	  }
 	  that.clear();
 	  that.draw();
 	  var gLoop = setTimeout(function () {
-		that.gameLoop(that);
+	  	that.gameLoop(that);
 	  }, this.interval_ms);
 	};
 
+
+  // Main
   var engine = new Engine(),
   canvasElem = document.getElementById('myCanvas');
 
@@ -383,8 +381,39 @@
   elem = document.getElementById('button1');
   elem.onclick = function () { engine.pressButton1(); };
 
+	elem = document.getElementById('viewFullscreen');
+	if (elem) {
+		elem.addEventListener('click', function () {
+			var elem = document.documentElement;
 
-    canvasElem.onclick = function (evt) {
+			if (elem.requestFullscreen) {
+				elem.requestFullscreen();
+			}
+			else if (elem.mozRequestFullScreen) {
+				elem.mozRequestFullScreen();
+			}
+			else if (elem.webkitRequestFullScreen) {
+				elem.webkitRequestFullScreen();
+			}
+		}, false);
+	}
+
+	elem = document.getElementById('cancelFullscreen');
+	if (elem) {
+		elem.addEventListener('click', function () {
+			if (document.exitFullscreen) {
+				document.exitFullscreen();
+			}
+			else if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			}
+			else if (document.webkitCancelFullScreen) {
+				document.webkitCancelFullScreen();
+			}
+		});
+	}
+
+  canvasElem.onclick = function (evt) {
     var half = engine.width * 0.5;
     if (evt.x < half) {
       engine.moveLeft();

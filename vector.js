@@ -6,7 +6,7 @@
   }
 
   Vector.prototype.toString = function () {
-    return '(' + this.x + ', ' + this.y + ')';
+    return '[object Vector <' + this.x + ', ' + this.y + '>]';
   };
 
   Vector.dotProduct = function (v1, v2) {
@@ -18,21 +18,8 @@
     return this.multiplyScalar(-1);
   };
 
-  // calculate vector from this point to another
-  Vector.prototype.toPoint = function (pt) {
-    return new Vector(pt.x - this.x, pt.y - this.y);
-  };
-
-  Vector.prototype.getPerpendicular = function () {
-    return new Vector(-this.y, this.x);
-  };
-
-  Vector.prototype.getUnitNormal = function () {
-    // divide each component by the length of the line
-    var n = this.getPerpendicular();
-    var len = Math.sqrt(Math.pow(n.x, 2) + Math.pow(n.y, 2));
-    return new Vector(Math.round(n.x / len), Math.round(n.y / len));
-    // todo proper vector multiply
+  Vector.prototype.clone = function () {
+    return new Vector(this.x, this.y);
   };
 
   Vector.prototype.multiplyScalar = function (n) {
@@ -51,8 +38,40 @@
     return new Vector(this.x - v.x, this.y - v.y);
   };
 
+  Vector.prototype.toFixed = function (digits) {
+    var round = function (value, digits) {
+      return parseFloat(value.toFixed(digits));
+    };
+    return new Vector(round(this.x, digits), round(this.y, digits));
+  }
+
+  // calculate vector from this point to another i.e. pt2 - pt 1.
+  Vector.prototype.toPoint = function (pt) {
+    return pt.subtract(this);
+  };
+
+  // find a vector that is perpendicular to the line described by this vector
+  Vector.prototype.getPerpendicular = function () {
+    return new Vector(-this.y, this.x);
+  };
+
+  Vector.prototype.getUnitNormal = function () {
+    // divide each component by the length of the line
+    var n = this.getPerpendicular();
+    var len = Math.sqrt(Math.pow(n.x, 2) + Math.pow(n.y, 2));
+    return new Vector(n.x / len, n.y / len);
+  };
+
+  Vector.prototype.length = function (v) {
+    var vd = this.subtract(v);
+    return Math.sqrt(Math.pow(vd.x, 2) + Math.pow(vd.y, 2));
+  };
+
+
   Vector.project = function (I, unitNormal) {
-    return unitNormal.multiplyScalar(Vector.dotProduct(I.negative(), unitNormal));
+  	var x = Vector.dotProduct(I.negative(), unitNormal),
+	   	N = unitNormal.multiplyScalar(x);
+    return N;
   };
 
   // Reflects initial vector I along the unit normal
@@ -76,44 +95,107 @@
   };
 
 
-  function Line(x1, y1, x2, y2) {
-    this.pt1 = new Vector(x1, y1);
-    this.pt2 = new Vector(x2, y2);
-	this.strokeStyle = 'red';
-    // vector from pt1 to pt2
-/*    var v = this.pt1.toPoint(this.pt2);
-    this.v = v;
-    this.P = v.getPerpendicular();
-    // the unit version of perpendicular
-    this.n1 = v.getUnitNormal();
-*/
+	Vector.segmentsIntersectAt = function (p0, p1, p2, p3) {
+		var s1 = p1.subtract(p0),
+		  s2 = p3.subtract(p2),
+		  a = (-s1.y * (p0.x - p2.x)) + (s1.x * (p0.y - p2.y)),
+		  b = (-s2.x * s1.y) + (s1.x * s2.y),
+		  s =  a / b,
+		  t = (s2.x * (p0.y - p2.y) - s2.y * (p0.x - p2.x)) / (-s2.x * s1.y + s1.x * s2.y);
+
+		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+			return p0.add(s1.multiplyScalar(t));
+		} else {
+			return null;
+		}
+	};
+
+
+  /**
+   * Constructor for Line object.
+   */
+  function Line(x0, y0, x1, y1) {
+    this.p0 = new Vector(x0, y0);
+    this.p1 = new Vector(x1, y1);
+    this.strokeStyle = 'red';
+    var v = this.p0.toPoint(this.p1);
+    this.v12 = v;
+    this.unitNormal = v.getUnitNormal();
+    this.width = 1;
   }
 
-  Line.prototype.vector = function () {
-    return this.pt1.toPoint(this.pt2);
-  };
-
-  Line.intersects = function (l1, l2) {
-	return Vector.segmentsIntersect(l1.pt1, l1.pt2, l2.pt1, l2.pt2);
-  };
-
   Line.prototype.toString = function () {
-    return 'line from ' + this.pt1 + ' to ' + this.pt2 + ' unit version of perpendicuar=' + this.n1;
-  };
-/*
-  Line.prototype.collide = function (I) {
-    // I is the initial vector I
-    var n = Vector.dotProduct(I.negative(), this.n1);
-
-    var N = this.n1.multiplyScalar(n);
-
-    var F = N.multiplyScalar(2).add(I);
-
-    return F;
+    return '[object Line <(' + this.p0.x + ', ' + this.p0.y + '), (' + this.p1.x + ', ' + this.p1.y + ')>]';
   };
 
-  var line = new Line(0,0,10,0);
-  var result = line.collide(new Vector(4,-2));
-//  test('collide', new Vector(4,2), result);
+  /**
+   * Reflects the line off this line. Return null if lines do not intersect.
+   */
+  Line.prototype.bounce = function (line) {
+		// do the lines intersect
+		var a = Vector.segmentsIntersectAt(line.p0, line.p1, this.p0, this.p1);
+		if (a === null) {
+		  return null;
+		}
 
-*/
+		// determine the velocity from this point
+		var I = line.p1.subtract(a);
+
+		// reflect the velocity off the line to the destination
+	  var newVelocity = Vector.reflect(I, this.unitNormal).toFixed(1);
+		var newPosition = a.add(newVelocity);
+    return new Line(a.x, a.y, newPosition.x, newPosition.y);
+  };
+
+  Line.prototype.velocityReflect = function (v) {
+    return Vector.reflect(v, this.unitNormal).toFixed(1);
+  };
+
+  /**
+   * Moves the start and end points of the line by the supplied vector.
+   */
+  Line.prototype.add = function (v) {
+    var p2 = this.p0.add(v),
+		p3 = this.p1.add(v);
+
+    return new Line(p2.x, p2.y, p3.x, p3.y);
+  };
+
+  /**
+   * Move this line towards the given line by a scalar distance in the direction of the perpendicular.
+   */
+  Line.prototype.extendTowards = function (line, length) {
+    // extend radius perpendicular to the line we are bouncing off
+    var v, pa, ps, la, ls, offset;
+
+	// determine which point is closer to thr target and move this line in that direction
+	v = this.unitNormal.multiplyScalar(length),
+	pa = this.p0.add(v),
+	ps = this.p0.subtract(v),
+	la  = pa.length(line.p0),
+	ls = ps.length(line.p0);
+
+    offset = (la <= ls) ? v : v.negative();
+    return this.add(offset);
+  };
+
+  /**
+   * Bounce the line off this one assuming it describes the centre of a circle with the given radius.
+   */
+  Line.prototype.bounceWithRadius = function (line, radius) {
+		// extend radius perpendicular to the line we are bouncing off
+		var linex = this.extendTowards(line, radius);
+
+		return linex.bounce(line);
+  };
+
+
+
+  function Box(x0, y0, x1, y1) {
+  	this.topLeft = new Vector(x0, y0);
+  	this.bottomRight = new Vector(x1, y1);
+  }
+
+  Box.prototype.inside = function (box) {
+    return (this.topLeft.x >= box.topLeft.x && this.topLeft.y >= box.topLeft.y && this.bottomRight.x <= box.bottomRight.x && this.bottomRight.y <= box.bottomRight.y);
+  };

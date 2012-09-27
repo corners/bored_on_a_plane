@@ -5,35 +5,32 @@
   <title></title>
 </head>
 <body>
-  <header>
-  </header>
-  <div role="main">
-<canvas id="myCanvas" width="400px" height="400px">
-Fallback content for those not using canvas
-</canvas>
-  </div>
-  <footer style="width=100%;">
-  <div style="background-color:red;width:300px;">
-<input type="button" id="moveLeft" value="left" style="width:49%;border:0;padding:0;" />
-<input type="button" id="moveRight" value="right" style="width:49%;border:0;padding:0;"/>
-</div>
-<br/>
-<input type="button" id="button1" value="button1" />
-	<p id='error'>
-		error goes here
-	</p>
-	<p id='test'>
-		test results go here
-	</p>
-  </footer>
-  
-  <script type="text/javascript" src="firebug-lite.js">
-  </script>
-  
-  <script src="vector.js">
-  </script>
+	<header>
+		<link rel="stylesheet" type="text/css" href="styles.css" />
+	</header>
+	<div role="main">
+		<canvas id="myCanvas">
+		You need canvas support to use this
+		</canvas>
+	</div>
+	<footer style="width=100%;">
+		<div id="inputs">
+			<button id="moveLeft" class="moveButton">Left</button>
+			<button id="moveRight" class="moveButton">Right</button>
+		</div>
+		<br/>
+		<input type="button" id="button1" value="button1" />
+		<button id="viewFullscreen">Show fullscreen</button>
+		<button id="cancelFullscreen">Exit fullscreen</button>
+	</footer>
 
-  <script src="game.js">
-  </script>
+	<script type="text/javascript" src="lib/firebug-lite/firebug-lite.js">
+	</script>
+
+	<script src="vector.js">
+	</script>
+
+	<script src="game.js">
+	</script>
 </body>
 </html>
