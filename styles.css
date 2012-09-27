@@ -1,0 +1,30 @@
+html:-moz-full-screen {
+	background: red;
+}
+
+html:-webkit-full-screen {
+	background: red;
+}
+
+html:fullscreen {
+	background: red;
+}
+
+
+div#inputs {
+	background: green;
+	width:500px;
+	height: 40px;
+}
+
+button.moveButton {
+	width: 49%;
+	height: 100%;
+	border: 0;
+	padding:0;
+}
+
+canvas#myCanvas {
+	width: 500px;
+	height: 400px;
+}
