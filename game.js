@@ -2,12 +2,18 @@
 	"use strict";
 
 	// todo namespace
+
+	var FPS = 30;
+
+	var GAME_WIDTH = 640,
+		GAME_HEIGHT = 480;
+
 	var PADDLE_COLOR = 'red',
 		PADDLE_WIDTH = 20,
 		PADDLE_HEIGHT = 2;
 
 	var BALL_START_POSITION = new Vector(150,93),
-		BALL_START_VELOCITY = new Vector(0, 8),
+		BALL_START_VELOCITY = new Vector(0, 1),
 		BALL_RADIUS = 2;
 
 
@@ -45,15 +51,14 @@
 	  return this.position.add(this.velocity);
 	};
 
-	function Engine() {
+	function Engine(width, height) {
 	  this.paused = false;
 	  this.i = 0;
 	  this.canvas = null;
 	  this.context = null;
-	  this.width = -1;
-	  this.height = -1;
-	  this.fps = 1;
-	  this.interval_ms = 1000 / this.fps;
+	  this.width = width;
+	  this.height = height;
+	  this.interval_ms = 1000 / FPS;
 
 	  // colors
 	  this.backgroundColor = '#000'; // black
@@ -73,10 +78,18 @@
 	  this.message = '';
 
 	  this.lines = [
-		  new Line(100, 100, 200, 100),
-	    new Line(100, 200, 200, 200)//,
-//		  new Line(400, 400, 300, 300),
-//		  new Line(100, 400, 200, 325)
+		// top
+		new Line(0, 0, width, 0),
+		// bottom
+		new Line(0, height - 11, width, height - 11),
+		// left
+		new Line(1, 0, 1, height),
+		// right
+		new Line(width, 0, width, height),
+		new Line(100, 100, 200, 120),
+		new Line(100, 200, 200, 300),
+		new Line(400, 400, 300, 300),
+		new Line(100, 400, 200, 325)
 	  ];
 
 	  this.gameState = 0;
@@ -155,8 +168,8 @@
 	  	if (this.context) {
 			// set the dimensions of the coordinate system.
 			// the size of the box will be set in CSS and should scale for us
-			canvas.setAttribute('width', '640');
-			canvas.setAttribute('height', '480');
+			canvas.setAttribute('width', GAME_WIDTH);
+			canvas.setAttribute('height', GAME_HEIGHT);
   		  	this.width = canvas.width;
 		    this.height = canvas.height;
 
@@ -256,35 +269,18 @@
 	  var b0 = this.ball.position,
 	    b1 = this.ball.move(),
 	    bline = new Line(b0.x, b0.y, b1.x, b1.y),
-	    rline,
 	    newv = this.ball.velocity.clone();
 
-	  // collision detection
-    // todo properly
-	// todo bounding boxes to identify those lines we may have collided with
-	  var walls = [
-	    // top
-	    new Line(0, 0, this.width, 0),
-      // bottom
-	    new Line(0, this.height - 11, this.width, this.height - 11),
-	    // left
-	    new Line(1, 0, 1, this.height),
-	    // right
-	    new Line(this.width, 0, this.width, this.height),
-	  ];
-
-		// on walls
-		var result = this.collideWithLines(bline, newv, this.ball.radius, walls);
-		bline = result.Line;
-		newv = result.Velocity;
+		// collision detection
+		// todo bounding boxes to identify those lines we may have collided with
 
 		// ball on lines
-		result = this.collideWithLines(bline, newv, this.ball.radius, this.lines);
+		var result = this.collideWithLines(bline, newv, this.ball.radius, this.lines);
 		bline = result.Line;
 		newv = result.Velocity;
 
-    this.ball.position = bline.p1.toFixed(0);
-    this.ball.velocity = newv.toFixed(0);
+		this.ball.position = bline.p1.toFixed(0);
+		this.ball.velocity = newv.toFixed(0);
 	};
 
 	Engine.prototype.clear = function () {
@@ -389,7 +385,7 @@
 
 
   // Main
-  var engine = new Engine(),
+  var engine = new Engine(GAME_WIDTH, GAME_HEIGHT),
   canvasElem = document.getElementById('myCanvas');
 
   engine.initialize(window, canvasElem);
