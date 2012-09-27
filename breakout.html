@@ -7,21 +7,23 @@
 <body>
 	<header>
 		<link rel="stylesheet" type="text/css" href="styles.css" />
+		<input type="button" id="button1" value="button1" />
+		<button id="viewFullscreen">Show fullscreen</button>
+		<button id="cancelFullscreen">Exit fullscreen</button>
 	</header>
+
 	<div role="main">
-		<canvas id="myCanvas" width="400px" height="400px">
+		<canvas id="myCanvas"> 
 		You need canvas support to use this
 		</canvas>
 	</div>
+	
 	<footer>
 		<div id="inputs">
 			<button id="moveLeft" class="moveButton">Left</button>
 			<button id="moveRight" class="moveButton">Right</button>
 		</div>
 		<br/>
-		<input type="button" id="button1" value="button1" />
-		<button id="viewFullscreen">Show fullscreen</button>
-		<button id="cancelFullscreen">Exit fullscreen</button>
 	</footer>
 
 	<script type="text/javascript" src="lib/firebug-lite/firebug-lite.js">

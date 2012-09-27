@@ -1,3 +1,7 @@
+footer {
+	width: 100%;
+}
+
 html:-moz-full-screen {
 	background: red;
 }
@@ -25,6 +29,6 @@ button.moveButton {
 }
 
 canvas#myCanvas {
-	width: 500px;
-	height: 400px;
+	width: 640px;
+	height: 480px;
 }

@@ -2,16 +2,22 @@
 	"use strict";
 
 	// todo namespace
+	var PADDLE_COLOR = 'red',
+		PADDLE_WIDTH = 20,
+		PADDLE_HEIGHT = 2;
 
+	var BALL_START_POSITION = new Vector(150,93),
+		BALL_START_VELOCITY = new Vector(0, 8),
+		BALL_RADIUS = 2;
 
 
 	function Paddle(id) {
 	  this.id = id;
 	  this.x = -1;
 	  this.y = -1;
-	  this.width = 20;
-	  this.height = 2;
-	  this.fillStyle = 'red';
+	  this.width = PADDLE_WIDTH;
+	  this.height = PADDLE_HEIGHT;
+	  this.fillStyle = PADDLE_COLOR;
 	  this.velocity = 0; // should be in pixels per second... not there yet
 	}
 
@@ -25,9 +31,9 @@
 
 	function Ball(id, x, y) {
 	  this.id = id;
-	  this.position = new Vector(150, 100);
-	  this.velocity = new Vector(0, 8);
-	  this.radius = 1;
+	  this.position = BALL_START_POSITION;
+	  this.velocity = BALL_START_VELOCITY;
+	  this.radius = BALL_RADIUS;
 	  this.color = 'white';
 	}
 
@@ -147,7 +153,11 @@
 
 	  if (this.canvas) {
 	  	if (this.context) {
-  		  this.width = canvas.width;
+			// set the dimensions of the coordinate system.
+			// the size of the box will be set in CSS and should scale for us
+			canvas.setAttribute('width', '640');
+			canvas.setAttribute('height', '480');
+  		  	this.width = canvas.width;
 		    this.height = canvas.height;
 
   		  wnd.addEventListener('keydown', function (evt) {
@@ -210,6 +220,27 @@
 	  }
 	};
 
+	/**
+	 * Collides the ball with the given lines until its velocity is exhaused.
+	 */
+	Engine.prototype.collideWithLines = function (ballLine, ballVelocity, radius, lines) {
+		var newLine,
+			line;
+
+		for (var i = 0; i < lines.length; i++) {
+			line = lines[i];
+			newLine = line.bounceWithRadius(ballLine, radius);
+			if (newLine !== null) {
+			  ballLine = newLine;
+			  ballVelocity = line.velocityReflect(ballVelocity);
+			}
+		}
+		return {
+			Velocity : ballVelocity,
+			Line : ballLine
+		}
+	};
+
 	Engine.prototype.move = function () {
 	  var box,
 	    line;
@@ -230,6 +261,7 @@
 
 	  // collision detection
     // todo properly
+	// todo bounding boxes to identify those lines we may have collided with
 	  var walls = [
 	    // top
 	    new Line(0, 0, this.width, 0),
@@ -242,25 +274,30 @@
 	  ];
 	  for (var i = 0; i < walls.length; i++) {
 		  line = walls[i];
-		  rline = line.bounceWithRadius(bline);
+		  rline = line.bounceWithRadius(bline, this.ball.radius);
 		  if (rline !== null) {
 		    bline = rline;
-// todo if we end on the line then do not calculate the new velocity
 		    newv = line.velocityReflect(newv);
 		  }
     }
 
 	  // ball on lines
-	  for (var i = 0; i < this.lines.length; i++) {
+		var result = this.collideWithLines(bline, newv, this.ball.radius, this.lines);
+		bline = result.Line;
+		newv = result.Velocity;
+/*
+  		for (var i = 0; i < this.lines.length; i++) {
 		  line = this.lines[i];
-		  rline = line.bounceWithRadius(bline);
+		  rline = line.bounceWithRadius(bline, this.ball.radius);
 		  if (rline !== null) {
 		    this.message = 'colision';
 		    bline = rline;
 		    newv = line.velocityReflect(newv);
 		  }
 		  else { this.message = ''; }
+
     }
+	*/
 
     this.ball.position = bline.p1.toFixed(0);
     this.ball.velocity = newv.toFixed(0);

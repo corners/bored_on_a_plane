@@ -1,5 +1,5 @@
 // Vector 1x2 only
-describe("vector", function () {
+describe("Vector", function () {
 
 	it("can we converted to meaningful string", function () {
 		var v = new Vector(-1, 2),
@@ -206,6 +206,24 @@ describe("line", function () {
 			newPosition = line.bounceWithRadius(ballLine, r);
 
 		expect(newPosition).toEqual(new Line(10, 45, 10, 30));
+	});
+
+	it("takes into account the balls radius when bouncing off a line 2", function () {
+		var ballLine = new Line(150, 196, 150, 204),
+		  r = 1,
+			line = new Line(100, 200, 200, 200),
+			newPosition = line.bounceWithRadius(ballLine, r);
+
+		expect(newPosition).toEqual(new Line(150, 199, 150, 194));
+	});
+
+	it("takes into account the balls radius when bouncing off a line 3", function () {
+		var ballLine = new Line(150, 7, 150, -1),
+		  r = 2,
+			line = new Line(0, 0, 200, 0),
+			newPosition = line.bounceWithRadius(ballLine, r);
+
+		expect(newPosition).toEqual(new Line(150, 2, 150, 5));
 	});
 
 	it("can extend a perpendicular to another line", function () {
