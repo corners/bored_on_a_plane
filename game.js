@@ -272,32 +272,16 @@
 	    // right
 	    new Line(this.width, 0, this.width, this.height),
 	  ];
-	  for (var i = 0; i < walls.length; i++) {
-		  line = walls[i];
-		  rline = line.bounceWithRadius(bline, this.ball.radius);
-		  if (rline !== null) {
-		    bline = rline;
-		    newv = line.velocityReflect(newv);
-		  }
-    }
 
-	  // ball on lines
-		var result = this.collideWithLines(bline, newv, this.ball.radius, this.lines);
+		// on walls
+		var result = this.collideWithLines(bline, newv, this.ball.radius, walls);
 		bline = result.Line;
 		newv = result.Velocity;
-/*
-  		for (var i = 0; i < this.lines.length; i++) {
-		  line = this.lines[i];
-		  rline = line.bounceWithRadius(bline, this.ball.radius);
-		  if (rline !== null) {
-		    this.message = 'colision';
-		    bline = rline;
-		    newv = line.velocityReflect(newv);
-		  }
-		  else { this.message = ''; }
 
-    }
-	*/
+		// ball on lines
+		result = this.collideWithLines(bline, newv, this.ball.radius, this.lines);
+		bline = result.Line;
+		newv = result.Velocity;
 
     this.ball.position = bline.p1.toFixed(0);
     this.ball.velocity = newv.toFixed(0);
