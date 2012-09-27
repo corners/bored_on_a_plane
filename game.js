@@ -54,7 +54,7 @@
 	  this.textColor = '#fff';
 
 	  // fonts
-	  this.font = '12px sans-serif';
+	  this.font = '12pt sans-serif';
 
 	  // game object
 	  this.paddle = new Paddle('paddle');
