@@ -1,9 +1,10 @@
-(function () {
+// Start the main app logic.
+requirejs(['Vector', 'Line', 'Box'],
+function (Vector, Line, Box) {
+
 	"use strict";
 
-	// todo namespace
-
-	var FPS = 30;
+	var FPS = 120;
 
 	var GAME_WIDTH = 640,
 		GAME_HEIGHT = 480;
@@ -14,7 +15,7 @@
 
 	var BALL_START_POSITION = new Vector(150,93),
 		BALL_START_VELOCITY = new Vector(0, 1),
-		BALL_RADIUS = 2;
+		BALL_RADIUS = 5;
 
 
 	function Paddle(id) {
@@ -234,7 +235,8 @@
 	};
 
 	/**
-	 * Collides the ball with the given lines until its velocity is exhaused.
+	 * Collides the ballLine with the given lines until its length has been reached.
+	 * Calculates the new volocity based on the reflected collisions.
 	 */
 	Engine.prototype.collideWithLines = function (ballLine, ballVelocity, radius, lines) {
 		var newLine,
@@ -279,8 +281,8 @@
 		bline = result.Line;
 		newv = result.Velocity;
 
-		this.ball.position = bline.p1.toFixed(0);
-		this.ball.velocity = newv.toFixed(0);
+		this.ball.position = bline.p1.round();
+		this.ball.velocity = newv;
 	};
 
 	Engine.prototype.clear = function () {
@@ -438,6 +440,7 @@
       engine.moveRight();
     }
   };
-})();
+
+});
 
 
