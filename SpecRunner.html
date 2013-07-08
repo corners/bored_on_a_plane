@@ -1,51 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html debug=true lang="en">
 <head>
 <meta charset="utf-8" />
   <title>Jasmine Test Runner</title>
   <link rel="stylesheet" type="text/css" href="lib/jasmine-1.0.2/jasmine.css">
-  <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine.js"></script>
-  <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
-
- 
- <!-- include source files here... -->
-	<script data-main="scripts/main" src="scripts/require.js"></script>
-
-  <!-- include spec files here... 
-  <script type="text/javascript" src="scripts/vector-spec.js"></script>
--->
-
-</head>
+	<script type="text/javascript">
+	window.onerror = function (e, d, c) {
+		document.writeln(e + '<br/>');
+		document.writeln('file: ' + d + '<br/>');
+		document.writeln('line: ' + c + '<br/>');
+	}
+	</script>
+	<script type="text/javascript" src="lib/jasmine-1.0.2/jasmine.js"></script>
+	<script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
+	<script data-main="scripts/test" src="scripts/require.js"></script>
+  </head>
 <body>
-
-<script type="text/javascript">
-requirejs.config({
-    shim: {
-        'vector-spec.js': {
-            //These script dependencies should be loaded before 
-            deps: ['vector'],
-            //Once loaded, this module value.
-            exports: 'spec'
-        }
-    }
-});
-
-requirejs(['spec', 'Vector'], 
-function (spec, Vector) {
-	describe("Vector2", function () {
-		it("xxx need to include tests here", function () {
-			var v = new Vector(-1, 2),
-				a = v.toString();
-
-			expect(a).toEqual("[object Vector <-1, 2>]");
-		});
-	});
-
-	jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-  	jasmine.getEnv().execute();
-});
-
-</script>
 
 </body>
 </html>
+ 

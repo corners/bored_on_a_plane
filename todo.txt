@@ -1,9 +1,7 @@
-- collisions need to take into account the radius of the ball
-- collisions nt always happening
-  # when ball ends on line no bounce happens
+- blocks
+- debug: arrow for velocity. lenght + direction
+
 - proper landing page
 - do not run game loop if not in game
-
 - jslint as a unit test
-- add landing page to automatically run js files through jslint and maybe run tests or make jslint a test
 

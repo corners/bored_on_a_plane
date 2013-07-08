@@ -4,7 +4,15 @@
   <meta charset="utf-8">
   <title></title>
   
+	<script type="text/javascript">
+	window.onerror = function (e, d, c) {
+		document.writeln(e + '<br/>');
+		document.writeln('file: ' + d + '<br/>');
+		document.writeln('line: ' + c + '<br/>');
+	}
+	</script>
 	<!-- data-main attribute tells require.js to load scripts/game.js after require.js loads. -->
+	<script src="scripts/underscore.js"></script>
 	<script data-main="scripts/game" src="scripts/require.js"></script>
   
 </head>
