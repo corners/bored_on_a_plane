@@ -62,10 +62,13 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
   function createGrid(numx, numy, x, y, width, height, args, colourFn) {
     args = args || { };
 
-    return _.chain(_.range(0, (numx*numy)-1))
+    var gapx = 10;
+    var gapy = 8;
+
+    return _.chain(_.range(0, (numx*numy)))
     .map(function (i) {
-      var startx = x + ((i % numx) * width);
-      var starty = y + (Math.floor(i / numx) * height);
+      var startx = x + ((i % numx) * (gapx + width));
+      var starty = y + (Math.floor(i / numx) * ( gapy + height));
       var b = { x: startx, y: starty, width: width, height: height, name: 'block ' + i };
       return new Block(_.extend(b, args));
     })
@@ -110,7 +113,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
       new Line(width-50, 0, width-50, height, { name: 'right' }),
     ];
 
-      this.gameShapes = shapes.concat(createGrid(14, 6, 60, 250, 36, 16, { fixed : false }));
+      this.gameShapes = shapes.concat(createGrid(5, 3, 60, 250, 36, 16, { fixed : false }));
       this.boundingBoxes = [];
 
     var shapeLines = _.chain(this.gameShapes)
@@ -176,7 +179,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
     } else if (this.gameState === Engine.GAMEOVER) {
       this.startGame();
     }
-      };
+  };
 
   Engine.prototype.moveLeft = function () {
     this.velocityInput -= 1;
