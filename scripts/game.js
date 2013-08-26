@@ -293,11 +293,13 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
         initialVelocity = velocity.clone();
 
     var ballLine = Line.calculateLine(start, velocity);
+    
+    // find lines we could collide with using bounding boxes
     var lineBox = ballLine.boundingBox();
-    var intersectsLine = function(bb) {
+    var boxesOverlap = function(bb) {
       return bb.shape.visible && (lineBox.intersects(bb.bb) || bb.bb.intersects(lineBox));
     };
-    var calculateCollision = function(bb) {
+    var bounceOffLine = function(bb) {
       return {
         collision: bb.line.bounceWithRadius(ballLine, radius, initialVelocity, lastCollision),
         shape: bb.shape
@@ -306,6 +308,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
     var hasCollided = function (result) {
       return result.collision !== null
     };
+    var closestCollision = function (result) {
+        // assume line bouncing furthest means closest collision 
+        return result.collision.Line.length();    
+    };
 
     var collides = true;
     while (collides) {
@@ -313,10 +319,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
 
       // Find all lines that collide and choose the closest
       var collisions = _.chain(boundingBoxes)
-                        .filter(intersectsLine)
-                        .map(calculateCollision)
+                        .filter(boxesOverlap)
+                        .map(bounceOffLine)
                         .filter(hasCollided)
-                        .sortBy(function (result) { return result.collision.Line.length() })
+                        .sortBy(closestCollision)
                         .value();
 
       result = _(collisions).first();
