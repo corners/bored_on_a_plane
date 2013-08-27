@@ -1,13 +1,17 @@
+/**
+  * Shim for libraries
+  */
 require.config({
-	paths: {
-//		"jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min",
-//		"underscore": "lib/underscore",
-	 }
+  shim: {
+    underscore: {
+      exports: '_'
+    },
+  }
 });
-
 
 require(
 [
+    "underscore",    
 	"Vector",
 	"Vector-Spec",
 	"Line",
@@ -15,7 +19,7 @@ require(
 	"Box",
 	"Box-Spec"
 ],
-function (Vector, VectorSpec, Line, LineSpec, Box, BoxSpec) {
+function (_, Vector, VectorSpec, Line, LineSpec, Box, BoxSpec) {
 	jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
 	jasmine.getEnv().execute();
 });

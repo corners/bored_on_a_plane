@@ -3,38 +3,41 @@
 <head>
   <meta charset="utf-8">
   <title>Bored on a Plane</title>
-
-	<script type="text/javascript">
+    <script type="text/javascript">
     window.onerror = function (e, d, c) {
-      document.writeln(e + '<br/>');
-      document.writeln('file: ' + d + '<br/>');
-      document.writeln('line: ' + c + '<br/>');
+        document.writeln(e + '<br/>');
+        document.writeln('file: ' + d + '<br/>');
+        document.writeln('line: ' + c + '<br/>');
     };
 	</script>
-  <script data-main="scripts/game" src="scripts/require.js"></script>
+    <script data-main="scripts/game" src="scripts/require.js"></script>
 </head>
 <body>
+	<link rel="stylesheet" type="text/css" href="styles.css" />
 	<header>
-		<link rel="stylesheet" type="text/css" href="styles.css" />
+	    <a href="SpecRunner.html">Tests</a>
 	</header>
 
 	<div role="main">
-		<div id="options">
-      <input type="button" id="button1" value="button1" />
-      <button id="viewFullscreen">Show fullscreen</button>
-      <button id="cancelFullscreen">Exit fullscreen</button>
+        <div id="options">
+            <input type="button" id="button1" value="button1" />
+            <button id="viewFullscreen">Show fullscreen</button>
+            <button id="cancelFullscreen">Exit fullscreen</button>
+        </div>
+    
+        <div id="screen">
+            <canvas id="myCanvas">
+                <p>You need canvas support to use this</p>
+            </canvas>
+        </div>
+        
+        <div id="inputs">
+            <button id="moveLeft" class="moveButton">Left</button>
+            <button id="moveRight" class="moveButton">Right</button>
+        </div>
     </div>
-    <div id="screen">
-		  <canvas id="myCanvas">You need canvas support to use this</canvas>
-    </div>
-		<div id="inputs">
-			<button id="moveLeft" class="moveButton">Left</button>
-			<button id="moveRight" class="moveButton">Right</button>
-		</div>
-		<br/>
-	</div>
 
 	<footer>
-  </footer>
+    </footer>
 </body>
 </html>

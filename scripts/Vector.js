@@ -113,17 +113,6 @@ define(
 		  	return N.multiplyScalar(2).add(I).toFixed(Vector.FIXED_DIGITS);
 		  };
 
-		  Vector.segmentsIntersect = function (p0, p1, p2, p3) {
-		      var s1 = p1.subtract(p0),
-		        s2 = p3.subtract(p2),
-		        a = (-s1.y * (p0.x - p2.x)) + (s1.x * (p0.y - p2.y)),
-		        b = (-s2.x * s1.y) + (s1.x * s2.y),
-		        s =  a / b,
-		        t = (s2.x * (p0.y - p2.y) - s2.y * (p0.x - p2.x)) / (-s2.x * s1.y + s1.x * s2.y);
-
-		      return s >= 0 && s <= 1 && t >= 0 && t <= 1;
-		  };
-
 			/** 
 			* Returns the point two lines intersect
 			*/
@@ -141,6 +130,11 @@ define(
 					return null;
 				}
 			};
+
+		  Vector.segmentsIntersect = function (p0, p1, p2, p3) {
+		      var r = Vector.segmentsIntersect(p0, p1, p2, p3);
+		      return r !== null;
+		  };
 
 		//return the constructor function so it can be used by other modules.
 		return Vector;
