@@ -355,7 +355,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
     var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.boundingBoxes, this.lastCollision);
 
     this.lastCollision = result.Collision;
-    this.ball.position = result.Line.p1.round();
+    this.ball.position = result.Line.p1;
     this.ball.velocity = result.Velocity;
     trace('posn=('+this.ball.position.x + ', ' + this.ball.position.y+ ')');
   };
