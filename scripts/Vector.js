@@ -22,6 +22,14 @@ define(
 		    return '[object Vector <' + this.x + ', ' + this.y + '>]';
 		  };
 
+		  /*
+			* name string descriptive name of vector
+			* returns string description of vector
+		  */
+		  Vector.prototype.describe = function (name) {
+		  	return name + ' = [' + this.x + ', ' + this.y + ']';
+		  };
+
 		  Vector.dotProduct = function (v1, v2) {
 		    // multiply corresponding entries and sum the products
 		    return (v1.x * v2.x) + (v1.y * v2.y);
@@ -85,9 +93,9 @@ define(
 		    return new Vector(n.x / len, n.y / len);
 		  };
 
-			Vector.prototype.getUnitVector = function () {
-				var a = Math.atan2(this.y, this.x);
-				return new Vector(Math.cos(a), Math.sin(a)).toFixed(Vector.FIXED_DIGITS);
+		Vector.prototype.getUnitVector = function () {
+			var a = Math.atan2(this.y, this.x);
+			return new Vector(Math.cos(a), Math.sin(a)).toFixed(Vector.FIXED_DIGITS);
 		};
 
 		  Vector.prototype.length = function (v) {

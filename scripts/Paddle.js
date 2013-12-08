@@ -34,6 +34,11 @@ define(
 				context.fill();
 			}
 
+			Paddle.prototype.describe = function () {
+				var s = (new Vector(this.x, this.y)).describe('p') + ' ' + (new Vector(this.velocity, 0).describe('v'));
+				return s;
+			};
+
 			return Paddle;
 		}
 );

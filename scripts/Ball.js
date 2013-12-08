@@ -34,6 +34,19 @@ define(
 			context.fill();
 		};
 
+		/*
+		 * Describe current state
+		 * returns string description of current state.
+		*/
+		Ball.prototype.describe = function () {
+			var s = this.position.describe('p');
+
+			if (this.position) {
+      			s += '\n' + this.velocity.describe('v');
+			}
+			return s;
+		}
+
 		return Ball;
 	}
 );

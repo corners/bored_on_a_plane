@@ -388,15 +388,15 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
 
   Engine.prototype.draw = function () {
     if (this.gameState === Engine.INGAME) {
-      this.drawText('i=' + this.i +
-                    ' velocity=' + this.paddle.velocity +
-                    ' ball: ' +
-                    ' x=' + this.ball.position.x +
-                    ' y=' + this.ball.position.y, 0, 0);
-      this.drawText(' v.x=' + this.ball.velocity.x +
-                    ' v.y=' + this.ball.velocity.y, 0, 12);
-    } else if (this.ball !== null && this.ball.position !== null) {
-      this.drawText('ball: x=' + this.ball.position.x + ' y=' + this.ball.position.y, 0, 0);
+      var lines = [ 'i:' + this.i, 
+                    'paddle: ' + this.paddle.describe(),
+                    'ball: ' + this.ball.describe()
+                  ];
+      var height = 14;
+      for (var i = 0; i < lines.length; i++) {
+        this.drawText(lines[i], 0, height * i);
+      }
+
     }
 
       if (this.message !== '') {
