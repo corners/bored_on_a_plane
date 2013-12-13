@@ -29,10 +29,24 @@ define(
 			this.name = ('name' in args) ? args.name : '';
 			this.fixed = ('fixed' in args) ? args.fixed : true;
 			this.visible = true;
+			this.shrinking = false;
 
 			this.fillStyle = ('fillStyle' in args ? args.fillStyle : 'yellow');
 			this.strokeStyle = ('strokeStyle' in args ? args.strokeStyle : 'green');
 		};
+
+		Block.prototype.shrink = function(size) {
+			if (this.width > size && this.height > size) {
+				this.p.x += size;
+				this.p.y += size;
+				this.width -= (2 * size);
+				this.height -= (2 * size);
+			} else {
+				// shrunk to nothing
+				this.visible = false;
+				this.shrinking = false;
+			}
+		}
 
 		Block.prototype.draw = function(context) {
 			if (this.visible) {
@@ -44,9 +58,8 @@ define(
 				context.lineWidth = this.lineWidth;
 				context.stroke();
 
-				if (this.animationStep === 1) {
-					this.strokeStyle = this.colour;
-					this.visible = this.fixed;
+				if (this.shrinking) {
+					this.shrink(2);
 				}
 				else if (this.animationStep > 1) {
 					this.animationStep--;
@@ -78,8 +91,10 @@ define(
 		};
 
 		Block.prototype.onCollision = function () {
-			this.fillStyle = 'red';
-			this.animationStep = 200;
+			if (!this.fixed) {
+				this.fillStyle = 'red';
+				this.shrinking = true;
+			}
 		};
 
 		return Block;

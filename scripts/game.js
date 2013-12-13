@@ -16,15 +16,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
   "use strict";
 
-  /**
-	  * Output any errors.
-	  */
-  window.onerror = function (e, d, c) {
-    document.writeln(e + '<br/>');
-    document.writeln('file: ' + d + '<br/>');
-    document.writeln('line: ' + c + '<br/>');
-  };
-
   var LOG_TRACE = 5;
   var LogLevel = 0;//LOG_TRACE; // increasing level means increasing detail
 
@@ -34,8 +25,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     }
   }
 
-
-  var FPS = 60;
 
   var GAME_WIDTH = 640,
       GAME_HEIGHT = 480;
@@ -62,7 +51,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.context = null;
     this.width = width;
     this.height = height;
-    this.interval_ms = 1000 / FPS;
 
     // colors
     this.backgroundColor = GAME_BACKGROUND;
@@ -281,26 +269,29 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
         return result.collision.Line.length();    
     };
 
-    var collides = true;
-    while (collides) {
-      collides = false;
-
+    var done = false,
+        collision;
+    while (!done) {
       // Find all lines that collide and choose the closest
-      var collisions = _.chain(boundingBoxes)
-                        .filter(boxesOverlap)
-                        .map(bounceOffLine)
-                        .filter(hasCollided)
-                        .sortBy(closestCollision)
-                        .value();
+      collision = _.chain(boundingBoxes)      
+                          .filter(boxesOverlap)
+                          .map(bounceOffLine)
+                          .filter(hasCollided)
+                          .sortBy(closestCollision)
+                          .first()
+                          .value();
 
-      result = _(collisions).first();
-      if (result) {
-        result.shape.onCollision();
-        ballLine = result.collision.Line;
+      if (collision) {
+        // notif
+        collision.shape.onCollision();
+        
+        ballLine = collision.collision.Line;
         lineBox = ballLine.boundingBox();
-        velocity = result.collision.Velocity;
-        lastCollision = result.collision.Collision;
-        collides = true;
+        velocity = collision.collision.Velocity;
+        lastCollision = collision.collision.Collision;
+        done = false;
+      } else {
+        done = true;
       }
     }
     return {
@@ -325,7 +316,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.lastCollision = result.Collision;
     this.ball.position = result.Line.p1;
     this.ball.velocity = result.Velocity;
-    trace('posn=('+this.ball.position.x + ', ' + this.ball.position.y+ ')');
+//    trace('posn=('+this.ball.position.x + ', ' + this.ball.position.y+ ')');
   };
 
   Engine.prototype.clear = function () {

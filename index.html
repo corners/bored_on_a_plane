@@ -4,10 +4,13 @@
   <meta charset="utf-8">
   <title>Bored on a Plane</title>
     <script type="text/javascript">
-    window.onerror = function (e, d, c) {
-        document.writeln(e + '<br/>');
-        document.writeln('file: ' + d + '<br/>');
-        document.writeln('line: ' + c + '<br/>');
+      /**
+          * Output any errors.
+          */
+        window.onerror = function (e, d, c) {
+            document.writeln(e + '<br/>');
+            document.writeln('file: ' + d + '<br/>');
+            document.writeln('line: ' + c + '<br/>');
     };
 	</script>
     <script data-main="scripts/game" src="scripts/require.js"></script>
@@ -20,7 +23,7 @@
 
 	<div role="main">
         <div id="options">
-            <input type="button" id="button1" value="button1" />
+            <input type="button" id="button1" value="Start" default />
             <button id="viewFullscreen">Show fullscreen</button>
             <button id="cancelFullscreen">Exit fullscreen</button>
         </div>
