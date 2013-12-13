@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
-          function (_, Vector, Line, Box, Block, Ball, Paddle) {
+require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level'],
+          function (_, Vector, Line, Box, Block, Ball, Paddle, Level) {
 
   "use strict";
 
@@ -55,26 +55,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
     return new Paddle('paddle', PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
   }
 
-  /**
-	 * Create grid of Blocks starting.
-	 * Returns array of Blocks.
-	 */
-  function createGrid(numx, numy, x, y, width, height, args, colourFn) {
-    args = args || { };
-
-    var gapx = 10;
-    var gapy = 8;
-
-    return _.chain(_.range(0, (numx*numy)))
-    .map(function (i) {
-      var startx = x + ((i % numx) * (gapx + width));
-      var starty = y + (Math.floor(i / numx) * ( gapy + height));
-      var b = { x: startx, y: starty, width: width, height: height, name: 'block ' + i };
-      return new Block(_.extend(b, args));
-    })
-    .value();
-  }
-
   function Engine(width, height) {
     this.paused = false;
     this.i = 0;
@@ -101,36 +81,24 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle'],
     // dashboard
     this.message = '';
 
-    // Shapes
-    var shapes = [
-      // top
-      new Line(50, 50, width-50, 50, { name: 'top' }),
-      // bottom
-      new Line(50, height - 50, width-50, height - 50, { name: 'bottom' }),
-      // left
-      new Line(50, 0, 50, height, { name: 'left' }),
-      // right
-      new Line(width-50, 0, width-50, height, { name: 'right' }),
-    ];
+    var level = new Level();
 
-      this.gameShapes = shapes.concat(createGrid(5, 3, 60, 250, 36, 16, { fixed : false }));
-      this.boundingBoxes = [];
+    this.gameShapes = level.getLayout(width, height);
 
-    var shapeLines = _.chain(this.gameShapes)
-    .map(function (s) {
-      var ols = s.outerLines();
-      return _.map(ols, function (l) {
-        return { line : l, shape : s };
-      });
-    })
-    .flatten()
-    .map(function (ls) {
-      return {
-        line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
-      };
-    })
-    .value();
-    this.boundingBoxes = shapeLines;
+    this.boundingBoxes = _.chain(this.gameShapes)
+      .map(function (s) {
+        var ols = s.outerLines();
+        return _.map(ols, function (l) {
+          return { line : l, shape : s };
+        });
+      })
+      .flatten()
+      .map(function (ls) {
+        return {
+          line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
+        };
+      })
+      .value();
 
     this.lastCollision = new Vector(-100, -100);
     this.gameState = 0;
