@@ -38,10 +38,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   // todo start on paddle and release based on paddle direction and speed
   var BALL_RADIUS = 5,
       BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 410),
-      BALL_START_VELOCITY = new Vector(1.5, -1.5);
+      BALL_START_VELOCITY = new Vector(2, 2);
 
-  function createPaddle() {
-    return new Paddle('paddle', PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
+  function createPaddle(x, y) {
+    return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
   }
 
   function Engine(width, height) {
@@ -52,6 +52,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.width = width;
     this.height = height;
 
+    this.keyPressNofifications = [];
+
     // colors
     this.backgroundColor = GAME_BACKGROUND;
     this.textColor = GAME_TEXT;
@@ -60,18 +62,22 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.font = '12pt sans-serif';
 
     // game objects
-    this.paddle = createPaddle();
+    this.paddle = createPaddle(width / 2, height - 50);
+    this.keyPressNofifications.push(function(shape) { 
+        return function (evt) {
+          shape.onKeyPress(evt);
+        };
+      }(this.paddle));
     this.ball = null;
-
-    // input
-    this.velocityInput = 0; // amount to adjust paddle velocity. left < 0. right > 0
 
     // dashboard
     this.message = '';
 
     var level = new Level();
 
-    this.gameShapes = level.getLayout(width, height);
+    // All game shapes must have the following Shape interface: outerLines(), boundingBox(), visible, onCollision(), draw(context)
+
+    this.gameShapes = level.getLayout(width, height).concat(this.paddle);
 
     this.boundingBoxes = _.chain(this.gameShapes)
       .map(function (s) {
@@ -110,15 +116,12 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.gameBox = new Box(0, 0, this.width, this.height);
 
     // game object
-    this.paddle = createPaddle();
-    this.paddle.x = (this.width - this.paddle.width) / 2;
-    this.paddle.y = this.height - this.paddle.height - 10;
+    // this.paddle = createPaddle();
+    // this.paddle.x = (this.width - this.paddle.width) / 2;
+    // this.paddle.y = this.height - this.paddle.height - 10;
 
     this.ball = null;
     this.ball = new Ball('main ball', this.paddle.x, this.height - this.paddle.height - 10, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
-
-    // input
-    this.velocityInput = 0; // amount to adjust paddle velocity. left < 0. right > 0
 
     // dashboard
     this.message = '';
@@ -133,30 +136,14 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else if (this.gameState === Engine.PAUSED) {
       this.gameState = Engine.INGAME;
     } else if (this.gameState === Engine.GAMEOVER) {
-      this.startGame();
+      this.startGame(); // todo not supported yet. need to reset paddle rather than remove. need to handle number of lives
     }
-  };
-
-  Engine.prototype.moveLeft = function () {
-    this.velocityInput -= 1;
-  };
-
-  Engine.prototype.moveRight = function () {
-    this.velocityInput += 1;
   };
 
   Engine.prototype.handleKeyDown = function (that, evt) {
-    switch (evt.keyCode) {
-        // Left arrow.
-      case 37:
-        that.moveLeft();
-        break;
-
-        // Right arrow.
-      case 39:
-        that.moveRight();
-        break;
-    }
+    this.keyPressNofifications.forEach(function(action) {
+      action(evt);
+    });
   };
 
   Engine.prototype.initialize = function (wnd, canvas) {
@@ -194,36 +181,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.gameState = Engine.GAMEOVER;
   };
 
-  Engine.prototype.handleAction = function () {
-    var maxVelocity = 10;
-
-    if (this.velocityInput < 0) {
-      // paddle left
-      if (this.paddle.velocity <= 0) {
-        this.paddle.velocity += this.velocityInput;
-      } else {
-        // If we're going in the opposite direction slow down fast
-        this.paddle.velocity = 0;
-      }
-      if (this.paddle.velocity < -maxVelocity) {
-        this.paddle.velocity = -maxVelocity;
-      }
-    } else if (this.velocityInput > 0) {
-      // paddle right
-      if (this.paddle.velocity >= 0) {
-        this.paddle.velocity += this.velocityInput;
-      } else {
-        // If we're going in the opposite direction slow down fast
-        this.paddle.velocity = 0;
-      }
-      if (this.paddle.velocity > maxVelocity) {
-        this.paddle.velocity = maxVelocity;
-      }
-    }
-
-      this.velocityInput = 0;
-  };
-
   Engine.prototype.logic = function () {
     var box;
 
@@ -253,7 +210,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     // find lines we could collide with using bounding boxes
     var lineBox = ballLine.boundingBox();
     var boxesOverlap = function(bb) {
-      return bb.shape.visible && (lineBox.intersects(bb.bb) || bb.bb.intersects(lineBox));
+      return bb.shape.isVisible() && (lineBox.intersects(bb.bb) || bb.bb.intersects(lineBox));
     };
     var bounceOffLine = function(bb) {
       return {
@@ -307,8 +264,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else {
       this.i += 1;
     }
-
-    this.paddle.x += this.paddle.velocity;
 
     // Collide with shapes
     var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.boundingBoxes, this.lastCollision);
@@ -376,7 +331,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.gameLoop = function (timestamp) {
-    this.handleAction();
+// todo remember keypreses then notify in handleAction so we calculate everything at once
+//    this.handleAction();
     this.logic();
     if (this.gameState === Engine.INGAME) {
       this.move();
@@ -410,11 +366,11 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   requestAnimationFrame(step);
 
 
-  var elem = document.getElementById('moveLeft');
-  elem.onclick = function () { engine.moveLeft(); };
-  elem = document.getElementById('moveRight');
-  elem.onclick = function () { engine.moveRight(); };
-  elem = document.getElementById('button1');
+  //var elem = document.getElementById('moveLeft');
+  // elem.onclick = function () { engine.moveLeft(); };
+  // elem = document.getElementById('moveRight');
+  // elem.onclick = function () { engine.moveRight(); };
+  var elem = document.getElementById('button1');
   elem.onclick = function () { engine.togglePauseResume(); };
 
   elem = document.getElementById('viewFullscreen');
@@ -448,15 +404,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
         }
         });
   }
-
-  canvasElem.onclick = function (evt) {
-    var half = engine.width * 0.5;
-    if (evt.x < half) {
-      engine.moveLeft();
-    } else {
-      engine.moveRight();
-    }
-  };
 });
 
 

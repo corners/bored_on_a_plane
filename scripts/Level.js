@@ -46,7 +46,7 @@ define(
 		      // top
 		      new Line(50, 50, width-50, 50, { name: 'top' }),
 		      // bottom
-		      new Line(50, height - 50, width-50, height - 50, { name: 'bottom' }),
+		      new Line(50, height - 5, width-50, height - 5, { name: 'bottom' }),
 		      // left
 		      new Line(50, 0, 50, height, { name: 'left' }),
 		      // right

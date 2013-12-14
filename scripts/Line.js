@@ -33,32 +33,6 @@ define(
 			this.lines = [ this ];
 		};
 
-
-		/**
-		  * Draw line to the supplied canvas context.
-		  */
-		Line.prototype.draw = function (context) {
-			var oldColor;
-
-			if (this.visible) {
-				context.beginPath();
-				context.moveTo(this.p0.x, this.p0.y);
-				context.lineTo(this.p1.x, this.p1.y);
-				context.lineWidth = this.width;
-				oldColor = context.strokeStyle;
-				context.strokeStyle = this.strokeStyle;
-				context.stroke();
-				context.strokeStyle = oldColor;
-			}
-			if (this.animationStep === 1) {
-				this.strokeStyle = this.colour;
-				this.visible = this.fixed;
-			}
-			else if (this.animationStep > 1) {
-				this.animationStep--;
-			}
-		};
-
 		/**
 		  *	The minimum difference in either direction between the start of a line and the point of collision.
 	  	  *	Collisions within this box are ignored.
@@ -85,7 +59,7 @@ define(
 			if (diff < Line.TOLERANCE) {
 				var Ix = line.p1.subtract(a);
 
-				console.log("within tollerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
+//				console.log("within tollerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
 
 				return null;
 			}
@@ -99,7 +73,7 @@ define(
 			var reflectedVelocity = Vector.reflect(velocity, this.unitNormal);
 			var result = new Line(a.x, a.y, newPosition.x, newPosition.y);
 
-			console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
+//			console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
 
 			return {
 				Line : result,
@@ -175,22 +149,74 @@ define(
 			return result
 		};
 
+
+
+		/// Shape interface
+
 		/**
-		 * Return the smallest box containing the whole of the line.
+		 * Describes the shape as a serious of outer lines. These lines are used for collision detection.
+		 * @returns {Line[]}
+		 */
+		Line.prototype.outerLines = function () {
+			return this.lines;
+		}
+
+		/**
+		 * @returns {Box} the smallest box containing the whole of the object.
 		 */
 		Line.prototype.boundingBox = function () {
 			return new Box(Math.min(this.p0.x, this.p1.x),
 				Math.min(this.p0.y, this.p1.y),
 				Math.max(this.p0.x, this.p1.x),
 				Math.max(this.p0.y, this.p1.y));
-		};
+		}
 
 		/**
-		 * returns outer lines in this shape for collision detection
+	     * @returns {bool} true if the object can be collided with.
 		 */
-		Line.prototype.outerLines = function () {
-			return this.lines;
-		};
+		Line.prototype.isVisible = function () {
+			return this.visible;
+		}
+
+		/**
+		 * Called when the ball collides with this object allowing the object to react.
+		 * TODO: pass in point of collision, velocity and object that collided
+		 */
+		Line.prototype.onCollision = function () {
+			if (!this.fixed) {
+				this.strokeStyle = this.colour2;
+				this.animationStep = 100;
+			}
+		}
+
+		/**
+		 * Tells the object to draw itself on the canvas.
+		 * @param {context} display context to use for drawing.
+		 */
+		Line.prototype.draw = function (context) {
+			var oldColor;
+
+			if (this.visible) {
+				context.beginPath();
+				context.moveTo(this.p0.x, this.p0.y);
+				context.lineTo(this.p1.x, this.p1.y);
+				context.lineWidth = this.width;
+				oldColor = context.strokeStyle;
+				context.strokeStyle = this.strokeStyle;
+				context.stroke();
+				context.strokeStyle = oldColor;
+			}
+			if (this.animationStep === 1) {
+				this.strokeStyle = this.colour;
+				this.visible = this.fixed;
+			}
+			else if (this.animationStep > 1) {
+				this.animationStep--;
+			}
+		}
+
+		// End Shape interface
+
 
 		/**
 		 * Calculate difference between p0 and p1.
@@ -204,13 +230,6 @@ define(
 		 */
 		Line.calculateLine = function (vector, velocity) {
 			return new Line(vector.x, vector.y, vector.x + velocity.x, vector.y + velocity.y);
-		};
-
-		Line.prototype.onCollision = function () {
-			if (!this.fixed) {
-				this.strokeStyle = this.colour2;
-				this.animationStep = 100;
-			}
 		};
 
 		//return the constructor function so it can be used by other modules.

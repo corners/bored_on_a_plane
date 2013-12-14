@@ -48,6 +48,45 @@ define(
 			}
 		}
 
+		/// Shape interface
+
+		/**
+		 * Describes the shape as a serious of outer lines. These lines are used for collision detection.
+		 * @returns {Line[]}
+		 */
+		Block.prototype.outerLines = function () {
+			return this.lines;
+		}
+
+		/**
+		 * @returns {Box} the smallest box containing the whole of the object.
+		 */
+		Block.prototype.boundingBox = function () {
+			return new Box(this.p.x, this.p.y, this.p.x + this.width, this.p.y + this.height);
+		}
+
+		/**
+	     * @returns {bool} true if the object can be collided with.
+		 */
+		Block.prototype.isVisible = function () {
+			return this.visible;
+		}
+
+		/**
+		 * Called when the ball collides with this object allowing the object to react.
+		 * TODO: pass in point of collision, velocity and object that collided
+		 */
+		Block.prototype.onCollision = function () {
+			if (!this.fixed) {
+				this.fillStyle = 'red';
+				this.shrinking = true;
+			}
+		}
+
+		/**
+		 * Tells the object to draw itself on the canvas.
+		 * @param {context} display context to use for drawing.
+		 */
 		Block.prototype.draw = function(context) {
 			if (this.visible) {
 				context.beginPath();
@@ -67,6 +106,9 @@ define(
 			}
 		};
 
+		// End Shape interface
+
+
 		/**
 		  * Bounce the line off this shape.
 		  * Assume the line describes the trajectory of a circle with the given radius.
@@ -76,27 +118,6 @@ define(
 				return null;  // shouldnt get here. box should resolve to series of lines
 		};
 */
-		/**
-		 * Return the smallest box containing the whole of the line.
-		 */
-		Block.prototype.boundingBox = function () {
-			return new Box(this.p.x, this.p.y, this.p.x + this.width, this.p.y + this.height);
-		};
-
-		/**
-		 * returns outer lines in this shape for collision detection
-		 */
-		Block.prototype.outerLines = function () {
-			return this.lines;
-		};
-
-		Block.prototype.onCollision = function () {
-			if (!this.fixed) {
-				this.fillStyle = 'red';
-				this.shrinking = true;
-			}
-		};
-
 		return Block;
 	}
 );
