@@ -44,6 +44,28 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
   }
 
+  /**
+   * @shapes {Shape[]} objects from which to create bounding boxes for.
+   * @returns {Collidable[] } array outer lines for each shape plus the shapes bounding box.
+   * Collidable = { line : Line, shape : Shape, bb : Box }
+   */
+  function createBoundingBoxes(shapes) {
+    return _.chain(shapes)
+      .map(function (s) {
+        var ols = s.outerLines();
+        return _.map(ols, function (l) {
+          return { line : l, shape : s };
+        });
+      })
+      .flatten()
+      .map(function (ls) {
+        return {
+          line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
+        };
+      })
+      .value();
+  }
+
   function Engine(width, height) {
     this.paused = false;
     this.i = 0;
@@ -79,23 +101,17 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     this.gameShapes = level.getLayout(width, height).concat(this.paddle);
 
-    this.boundingBoxes = _.chain(this.gameShapes)
-      .map(function (s) {
-        var ols = s.outerLines();
-        return _.map(ols, function (l) {
-          return { line : l, shape : s };
-        });
-      })
-      .flatten()
-      .map(function (ls) {
-        return {
-          line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
-        };
-      })
-      .value();
-
+    this.fixedBoundingBoxes = createBoundingBoxes(this.gameShapes);
+  
     this.lastCollision = new Vector(-100, -100);
     this.gameState = 0;
+  }
+
+  /**
+   * @returns {Collidable[]} array of collidable lines and their associated shapes.
+   */
+  Engine.prototype.getCollidables = function () {
+    return this.fixedBoundingBoxes;// .concat(dynamicCollidables);
   }
 
   /**
@@ -266,7 +282,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     }
 
     // Collide with shapes
-    var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.boundingBoxes, this.lastCollision);
+    var collidables = this.getCollidables();
+    var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, collidables, this.lastCollision);
 
     this.lastCollision = result.Collision;
     this.ball.position = result.Line.p1;
