@@ -96,7 +96,7 @@ define(
 
 
 			Paddle.prototype.describe = function () {
-				var s = (new Vector(this.x, this.y)).describe('p') + ' ' + (new Vector(this.velocity, 0).describe('v'));
+				var s = (new Vector(this.p.x, this.p.y)).describe('p') + ' ' + (new Vector(this.velocity, 0).describe('v'));
 				return s;
 			};
 

@@ -37,7 +37,7 @@ define(
 		  *	The minimum difference in either direction between the start of a line and the point of collision.
 	  	  *	Collisions within this box are ignored.
 		  */
-		Line.TOLERANCE = 0.51;
+		Line.TOLERANCE = 0.01;
 
 		Line.prototype.toString = function () {
 			return '[object Line <(' + this.p0.x + ', ' + this.p0.y + '), (' + this.p1.x + ', ' + this.p1.y + ')>]';
@@ -46,6 +46,7 @@ define(
 		/**
 		  * Reflects the line off this line. Return null if lines do not intersect.
 		  * todo change line to start p and calculate
+		   * @returns { Line {Line}, Velocity {Vector}, Collision {Vector} } object describing the new line of travel for the ball, the new velocity and the point of collision
 		  */
 		Line.prototype.bounce = function (line, velocity, lastCollision) {
 			// do the lines intersect
@@ -56,10 +57,10 @@ define(
 
 			// if the start intersects then ignore
 			var diff = Math.abs(new Line(a.x, a.y, lastCollision.x, lastCollision.y).length());
-			if (diff < Line.TOLERANCE) {
+			if (diff === 0) {
 				var Ix = line.p1.subtract(a);
 
-//				console.log("within tollerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
+				console.log("within tolerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
 
 				return null;
 			}
@@ -73,7 +74,7 @@ define(
 			var reflectedVelocity = Vector.reflect(velocity, this.unitNormal);
 			var result = new Line(a.x, a.y, newPosition.x, newPosition.y);
 
-//			console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
+			console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
 
 			return {
 				Line : result,

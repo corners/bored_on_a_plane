@@ -54,7 +54,9 @@ define(
 		    ];
 
 		    // add bricks
-		    return shapes.concat(createGrid(10, 8, 95, 70, 36, 16, { fixed : false }));
+			var bricks = createGrid(10, 8, 95, 70, 36, 16, { fixed : false });
+
+		    return shapes.concat(bricks);
 		}
 
 

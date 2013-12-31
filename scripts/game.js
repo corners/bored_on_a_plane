@@ -33,12 +33,12 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       GAME_TEXT = '#000';
 
   var PADDLE_COLOR = 'red',
-      PADDLE_WIDTH = 20,
-      PADDLE_HEIGHT = 2;
+      PADDLE_WIDTH = 200,
+      PADDLE_HEIGHT = 8;
   // todo start on paddle and release based on paddle direction and speed
-  var BALL_RADIUS = 5,
+  var BALL_RADIUS = 3,
       BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 410),
-      BALL_START_VELOCITY = new Vector(2, 2);
+      BALL_START_VELOCITY = new Vector(2.5, 3);
 
   function createPaddle(x, y) {
     return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
@@ -49,7 +49,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
    * @returns {Collidable[] } array outer lines for each shape plus the shapes bounding box.
    * Collidable = { line : Line, shape : Shape, bb : Box }
    */
-  function createBoundingBoxes(shapes) {
+  function createCollidables(shapes) {
     return _.chain(shapes)
       .map(function (s) {
         var ols = s.outerLines();
@@ -84,7 +84,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.font = '12pt sans-serif';
 
     // game objects
-    this.paddle = createPaddle(width / 2, height - 50);
+    this.paddle = createPaddle(200, height - 50);
     this.keyPressNofifications.push(function(shape) { 
         return function (evt) {
           shape.onKeyPress(evt);
@@ -97,12 +97,11 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     var level = new Level();
 
-    // All game shapes must have the following Shape interface: outerLines(), boundingBox(), visible, onCollision(), draw(context)
+    this.gameShapes = level.getLayout(width, height);
 
-    this.gameShapes = level.getLayout(width, height).concat(this.paddle);
+    // these shapes do not move
+    this.staticCollidables = createCollidables(this.gameShapes);
 
-    this.fixedBoundingBoxes = createBoundingBoxes(this.gameShapes);
-  
     this.lastCollision = new Vector(-100, -100);
     this.gameState = 0;
   }
@@ -111,7 +110,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
    * @returns {Collidable[]} array of collidable lines and their associated shapes.
    */
   Engine.prototype.getCollidables = function () {
-    return this.fixedBoundingBoxes;// .concat(dynamicCollidables);
+    var dynamics = [ this.paddle ];
+    var dynamicCollidables = createCollidables(dynamics);
+
+    return this.staticCollidables.concat(dynamicCollidables);
   }
 
   /**
@@ -215,9 +217,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
   /**
 	 * Collides the line the ball will take with the shapes on the screen until its length has been reached.
-	 * Calculates the new volocity based on the reflected collisions.
+	 * Calculates the new velocity based on the reflected collisions.
 	 */
-  Engine.collideWithShapes = function (start, velocity, radius, boundingBoxes, lastCollision) {
+  Engine.collideWithShapes = function (start, velocity, radius, collidables, lastCollision) {
     var result,
         initialVelocity = velocity.clone();
 
@@ -225,6 +227,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     
     // find lines we could collide with using bounding boxes
     var lineBox = ballLine.boundingBox();
+
+    // Returns true if the shape overlaps the bounding box of the ball line
     var boxesOverlap = function(bb) {
       return bb.shape.isVisible() && (lineBox.intersects(bb.bb) || bb.bb.intersects(lineBox));
     };
@@ -238,15 +242,15 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       return result.collision !== null
     };
     var closestCollision = function (result) {
-        // assume line bouncing furthest means closest collision 
-        return result.collision.Line.length();    
+      // assume line bouncing furthest means closest collision 
+      return result.collision.Line.length();    
     };
 
     var done = false,
         collision;
     while (!done) {
       // Find all lines that collide and choose the closest
-      collision = _.chain(boundingBoxes)      
+      collision = _.chain(collidables)      
                           .filter(boxesOverlap)
                           .map(bounceOffLine)
                           .filter(hasCollided)
@@ -330,10 +334,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     }
 
-      if (this.message !== '') {
-        // todo prettify
-        this.drawCenteredText(this.message, 0, this.width, 36);
-      }
+    if (this.message !== '') {
+      // todo prettify
+      this.drawCenteredText(this.message, 0, this.width, 36);
+    }
 
     if (this.paddle !== null) {
       this.paddle.draw(this.context);
