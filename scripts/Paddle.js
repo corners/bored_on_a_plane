@@ -19,12 +19,6 @@ define(
 				this.fillStyle = color;
 				this.velocity = 0; // should be in pixels per second... not there yet
 				this.visible = true;
-				this.lines = [
-					new Line(x, y, x + width, y),
-					new Line(x + width, y, x + width, y + height),
-					new Line(x, y + height, x + width, y + height),
-					new Line(x, y, x, y + height)
-				];
 			}
 
 			/// Notification
@@ -50,7 +44,12 @@ define(
 			 * @returns {Line[]}
 			 */
 			Paddle.prototype.outerLines = function () {
-				return this.lines;
+				return [
+					new Line(this.p.x, this.p.y, this.p.x + this.width, this.p.y),
+					new Line(this.p.x + this.width, this.p.y, this.p.x + this.width, this.p.y + this.height),
+					new Line(this.p.x, this.p.y + this.height, this.p.x + this.p.width, this.p.y + this.height),
+					new Line(this.p.x, this.p.y, this.p.x, this.p.y + this.height)
+				];
 			}
 
 			/**

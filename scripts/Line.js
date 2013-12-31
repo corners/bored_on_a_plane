@@ -33,11 +33,6 @@ define(
 			this.lines = [ this ];
 		};
 
-		/**
-		  *	The minimum difference in either direction between the start of a line and the point of collision.
-	  	  *	Collisions within this box are ignored.
-		  */
-		Line.TOLERANCE = 0.01;
 
 		Line.prototype.toString = function () {
 			return '[object Line <(' + this.p0.x + ', ' + this.p0.y + '), (' + this.p1.x + ', ' + this.p1.y + ')>]';
@@ -60,7 +55,7 @@ define(
 			if (diff === 0) {
 				var Ix = line.p1.subtract(a);
 
-				console.log("within tolerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
+//				console.log("within tolerance to point " + lastCollision.toString() + ' at ' + a.toString() + 'I=' + Ix.toString());
 
 				return null;
 			}
@@ -74,7 +69,7 @@ define(
 			var reflectedVelocity = Vector.reflect(velocity, this.unitNormal);
 			var result = new Line(a.x, a.y, newPosition.x, newPosition.y);
 
-			console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
+			// console.log('collided with line: ' + this.toString() + ' at ' + a.toString() + ' I=' + I.toString() +' new v=' + reflectedVelocity.toString() + ' lastC=' + lastCollision.toString());
 
 			return {
 				Line : result,

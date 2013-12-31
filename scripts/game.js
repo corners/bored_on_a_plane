@@ -84,7 +84,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.font = '12pt sans-serif';
 
     // game objects
-    this.paddle = createPaddle(200, height - 50);
+    this.paddle = createPaddle(200, 430);//height - 50);
     this.keyPressNofifications.push(function(shape) { 
         return function (evt) {
           shape.onKeyPress(evt);
@@ -113,7 +113,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     var dynamics = [ this.paddle ];
     var dynamicCollidables = createCollidables(dynamics);
 
-    return this.staticCollidables.concat(dynamicCollidables);
+    return dynamicCollidables.concat(this.staticCollidables);
   }
 
   /**
@@ -132,11 +132,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
   Engine.prototype.startGame = function () {
     this.gameBox = new Box(0, 0, this.width, this.height);
-
-    // game object
-    // this.paddle = createPaddle();
-    // this.paddle.x = (this.width - this.paddle.width) / 2;
-    // this.paddle.y = this.height - this.paddle.height - 10;
 
     this.ball = null;
     this.ball = new Ball('main ball', this.paddle.x, this.height - this.paddle.height - 10, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
@@ -213,7 +208,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else if (this.gameState === Engine.GAMEOVER) {
       this.message = 'game over press button1 to play again';
     }
-      };
+  };
 
   /**
 	 * Collides the line the ball will take with the shapes on the screen until its length has been reached.
@@ -250,11 +245,19 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
         collision;
     while (!done) {
       // Find all lines that collide and choose the closest
-      collision = _.chain(collidables)      
+      var collisions = _.chain(collidables)      
                           .filter(boxesOverlap)
                           .map(bounceOffLine)
                           .filter(hasCollided)
                           .sortBy(closestCollision)
+                          .value();
+      if (collisions.length > 1) {
+        // TODO handle two collisions at the same distance
+
+        console.log('collisions = ' + collisions.length + ' 0:' + collisions[0].collision.Line.length()+ ' 1:' + collisions[1].collision.Line.length());
+      }
+
+      collision = _.chain(collisions)
                           .first()
                           .value();
 
@@ -361,7 +364,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.clear();
     this.draw();
 
-    this.drawCenteredText(timestamp, 0, this.width, 36);
+    this.drawCenteredText('Time between frames ' + timestamp.toFixed(1) + 'ms', 0, this.width, 36);
   };
 
   // Main
