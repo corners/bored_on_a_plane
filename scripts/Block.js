@@ -66,7 +66,7 @@ define(
 		}
 
 		/**
-	     * @returns {bool} true if the object can be collided with.
+	   * @returns {bool} true if the object can be collided with.
 		 */
 		Block.prototype.isVisible = function () {
 			return this.visible;

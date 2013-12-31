@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level'],
-          function (_, Vector, Line, Box, Block, Ball, Paddle, Level) {
+require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles'],
+          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles) {
 
   "use strict";
 
@@ -29,11 +29,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   var GAME_WIDTH = 640,
       GAME_HEIGHT = 480;
 
-  var GAME_BACKGROUND = '#ddd',
-      GAME_TEXT = '#000';
-
-  var PADDLE_COLOR = 'red',
-      PADDLE_WIDTH = 200,
+  var PADDLE_WIDTH = 80,
       PADDLE_HEIGHT = 8;
   // todo start on paddle and release based on paddle direction and speed
   var BALL_RADIUS = 3,
@@ -41,7 +37,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       BALL_START_VELOCITY = new Vector(2.5, 3);
 
   function createPaddle(x, y) {
-    return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_COLOR);
+    return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, Styles.Paddle.Fill);
   }
 
   /**
@@ -77,11 +73,11 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.keyPressNofifications = [];
 
     // colors
-    this.backgroundColor = GAME_BACKGROUND;
-    this.textColor = GAME_TEXT;
+    this.backgroundColor = Styles.Game.Fill;
+    this.textColor = Styles.Game.Stroke;
 
     // fonts
-    this.font = '12pt sans-serif';
+    this.font = Styles.Game.Font;
 
     // game objects
     this.paddle = createPaddle(200, 430);//height - 50);
@@ -95,7 +91,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     // dashboard
     this.message = '';
 
-    var level = new Level();
+    var level = new Level(Styles.BlockStyle[0]);
 
     this.gameShapes = level.getLayout(width, height);
 
@@ -133,7 +129,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   Engine.prototype.startGame = function () {
     this.gameBox = new Box(0, 0, this.width, this.height);
 
-    this.ball = null;
     this.ball = new Ball('main ball', this.paddle.x, this.height - this.paddle.height - 10, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
 
     // dashboard
@@ -253,8 +248,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
                           .value();
       if (collisions.length > 1) {
         // TODO handle two collisions at the same distance
-
-        console.log('collisions = ' + collisions.length + ' 0:' + collisions[0].collision.Line.length()+ ' 1:' + collisions[1].collision.Line.length());
+        // console.log('collisions = ' + collisions.length + ' 0:' + collisions[0].collision.Line.length()+ ' 1:' + collisions[1].collision.Line.length());
       }
 
       collision = _.chain(collisions)
@@ -262,7 +256,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
                           .value();
 
       if (collision) {
-        // notif
+        // notify
         collision.shape.onCollision();
         
         ballLine = collision.collision.Line;
@@ -334,7 +328,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       for (var i = 0; i < lines.length; i++) {
         this.drawText(lines[i], 0, height * i);
       }
-
     }
 
     if (this.message !== '') {
@@ -354,7 +347,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     }
   };
 
-  Engine.prototype.gameLoop = function (timestamp) {
+  Engine.prototype.gameLoop = function (fps) {
 // todo remember keypreses then notify in handleAction so we calculate everything at once
 //    this.handleAction();
     this.logic();
@@ -364,7 +357,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.clear();
     this.draw();
 
-    this.drawCenteredText('Time between frames ' + timestamp.toFixed(1) + 'ms', 0, this.width, 36);
+    this.drawCenteredText(fps + ' FPS', 0, this.width, 36);
   };
 
   // Main
@@ -379,13 +372,26 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       window.msRequestAnimationFrame;
   window.requestAnimationFrame = requestAnimationFrame;
 
-  var start = Date.now();  // Only supported in FF. Other browsers can use something like Date.now().
+  var start = null,
+      frames = 0,
+      fps = 0;
 
+  /**
+   * Game loop.
+   * @timestamp {DOMHighResTimeStamp} time in milliseconds at which the repaint is scheduled to occur. 
+   */
   function step(timestamp) {
-    var progress = timestamp - start;
-    engine.gameLoop(progress);
+    if (start === null) {
+      start = timestamp;
+    }
+    if ((timestamp - start) >= 1000) {
+      fps = frames;
+      frames = 0;
+      start = timestamp;
+    }
+    frames++;
+    engine.gameLoop(fps);
     requestAnimationFrame(step);
-    start = timestamp;
   }
   requestAnimationFrame(step);
 
@@ -408,10 +414,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       else if (elem.mozRequestFullScreen) {
         elem.mozRequestFullScreen();
       }
-        else if (elem.webkitRequestFullScreen) {
-          elem.webkitRequestFullScreen();
-        }
-        }, false);
+      else if (elem.webkitRequestFullScreen) {
+        elem.webkitRequestFullScreen();
+      }
+    }, false);
   }
 
   elem = document.getElementById('cancelFullscreen');
@@ -423,11 +429,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       else if (document.mozCancelFullScreen) {
         document.mozCancelFullScreen();
       }
-        else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        }
-        });
+      else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+    });
   }
 });
-
-

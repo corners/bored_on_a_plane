@@ -28,22 +28,22 @@ define(
 		Box.prototype.intersects = function (rectB) {
 		
 			// Cond1.  If A's left edge is to the right of the B's right edge,
-      //     -  then A is Totally to right Of B
-//Cond2.  If A's right edge is to the left of the B's left edge,
-//           -  then A is Totally to left Of B
-//Cond3.  If A's top edge is below B's bottom  edge,
-//           -  then A is Totally below B
-//Cond4.  If A's bottom edge is above B's top edge,
-//          -  then A is Totally above B
-//So condition for Non-Overlap is
-//
-//Cond1 Or Cond2 Or Cond3 Or Cond4
-//Therefore, a sufficient condition for Overlap is the opposite (De Morgan)
-//Not Cond1 AND Not Cond2 And Not Cond3 And Not Cond4
+      		//     -  then A is Totally to right Of B
+			//Cond2.  If A's right edge is to the left of the B's left edge,
+			//           -  then A is Totally to left Of B
+			//Cond3.  If A's top edge is below B's bottom  edge,
+			//           -  then A is Totally below B
+			//Cond4.  If A's bottom edge is above B's top edge,
+			//          -  then A is Totally above B
+			//So condition for Non-Overlap is
+			//
+			//Cond1 Or Cond2 Or Cond3 Or Cond4
+			//Therefore, a sufficient condition for Overlap is the opposite (De Morgan)
+			//Not Cond1 AND Not Cond2 And Not Cond3 And Not Cond4
 		
 			var rectA = this;
 			return (rectA.x1 <= rectB.x2 && rectA.x2 >= rectB.x1 &&
-		    rectA.y1 <= rectB.y2 && rectA.y2 >= rectB.y1); 
+		   		rectA.y1 <= rectB.y2 && rectA.y2 >= rectB.y1); 
 		};
 		return Box;
 	}

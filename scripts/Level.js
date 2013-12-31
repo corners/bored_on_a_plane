@@ -12,24 +12,38 @@ define(
 		/** 
 		 * Constructs a description of a level.
 		 */
-		function Level() {
+		function Level(style) {
+			this.fillStyle = style.Fill;
+			this.strokeStyle = style.Stroke;
+		}
+
+		function addIfMissing(obj, name, value) {
+			if (!(name in obj)) {
+				obj[name] = value;
+			}
 		}
 
 		/**
 		 * Create grid of Blocks starting.
-		 * Returns array of Blocks.
+		 * @returns Block[]
 		 */
-		function createGrid(numx, numy, x, y, width, height, args, colourFn) {
+		Level.prototype.createGrid = function (numx, numy, x, y, width, height, args) {
 			args = args || { };
 
 			var gapx = 10;
 			var gapy = 8;
 
-			return _.chain(_.range(0, (numx*numy)))
+			return _.chain(_.range(0, (numx * numy)))
 				.map(function (i) {
 				  var startx = x + ((i % numx) * (gapx + width));
 				  var starty = y + (Math.floor(i / numx) * ( gapy + height));
-				  var b = { x: startx, y: starty, width: width, height: height, name: 'block ' + i };
+				  var b = { 
+				  	x: startx, 
+				  	y: starty, 
+				  	width: width, 
+				  	height: height, 
+				  	name: 'block ' + i
+				  };
 				  return new Block(_.extend(b, args));
 				})
 				.value();
@@ -41,24 +55,23 @@ define(
 		 */
 		Level.prototype.getLayout = function (width, height) {
 
-		    // Define borders
-		    var shapes = [
-		      // top
-		      new Line(50, 50, width-50, 50, { name: 'top' }),
-		      // bottom
-		      new Line(50, height - 5, width-50, height - 5, { name: 'bottom' }),
-		      // left
-		      new Line(50, 0, 50, height, { name: 'left' }),
-		      // right
-		      new Line(width-50, 0, width-50, height, { name: 'right' }),
-		    ];
+	    // Define borders
+	    var shapes = [
+	      // top
+	      new Line(50, 50, width-50, 50, { name: 'top' }),
+	      // bottom
+	      new Line(50, height - 5, width-50, height - 5, { name: 'bottom' }),
+	      // left
+	      new Line(50, 0, 50, height, { name: 'left' }),
+	      // right
+	      new Line(width-50, 0, width-50, height, { name: 'right' }),
+	    ];
 
-		    // add bricks
-			var bricks = createGrid(10, 8, 95, 70, 36, 16, { fixed : false });
+	    // add bricks
+			var bricks = this.createGrid(10, 8, 95, 70, 36, 16, { fixed : false, fillStyle : this.fillStyle, strokeStyle: this.strokeStyle });
 
-		    return shapes.concat(bricks);
+		  return shapes.concat(bricks);
 		}
-
 
 		return Level;
 	}

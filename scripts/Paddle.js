@@ -71,7 +71,7 @@ define(
 			 * TODO: pass in point of collision, velocity and object that collided
 			 */
 			Paddle.prototype.onCollision = function () {
-				this.fillStyle = 'orange';
+				// this.fillStyle = 'orange';
 			}
 
 			/**
