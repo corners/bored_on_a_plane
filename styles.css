@@ -15,20 +15,6 @@ html:fullscreen {
 }
 
 
-div#inputs {
-	background: green;
-	width:500px;
-	height: 40px;
-}
-
-button.moveButton {
-	width: 49%;
-	height: 100%;
-	border: 0;
-	padding:0;
-}
-
 canvas#myCanvas {
-	width: 640px;
-	height: 480px;
+	width: 60%;
 }

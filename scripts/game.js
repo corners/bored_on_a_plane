@@ -86,6 +86,11 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
           shape.onKeyPress(evt);
         };
       }(this.paddle));
+    this.keyPressNofifications.push(function(game) {
+        return function (evt) {
+          game.onKeyPress(evt);
+        };
+      }(this));
     this.ball = null;
 
     // dashboard
@@ -148,6 +153,15 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     }
   };
 
+  Engine.prototype.onKeyPress = function (evt) {
+    switch (evt.keyCode) {
+      // space
+      case 32:
+        this.togglePauseResume();
+        break;
+    }
+  };
+
   Engine.prototype.handleKeyDown = function (that, evt) {
     this.keyPressNofifications.forEach(function(action) {
       action(evt);
@@ -201,7 +215,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else if (this.gameState === Engine.PAUSED) {
       this.message = 'paused';
     } else if (this.gameState === Engine.GAMEOVER) {
-      this.message = 'game over press button1 to play again';
+      this.message = 'game over press space to play again';
     }
   };
 
@@ -281,7 +295,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else {
       this.i += 1;
     }
-
     // Collide with shapes
     var collidables = this.getCollidables();
     var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, collidables, this.lastCollision);
@@ -394,44 +407,4 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
-
-
-  //var elem = document.getElementById('moveLeft');
-  // elem.onclick = function () { engine.moveLeft(); };
-  // elem = document.getElementById('moveRight');
-  // elem.onclick = function () { engine.moveRight(); };
-  var elem = document.getElementById('button1');
-  elem.onclick = function () { engine.togglePauseResume(); };
-
-  elem = document.getElementById('viewFullscreen');
-  if (elem) {
-    elem.addEventListener('click', function () {
-      var elem = document.documentElement;
-
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      }
-      else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      }
-      else if (elem.webkitRequestFullScreen) {
-        elem.webkitRequestFullScreen();
-      }
-    }, false);
-  }
-
-  elem = document.getElementById('cancelFullscreen');
-  if (elem) {
-    elem.addEventListener('click', function () {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-      else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      }
-      else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen();
-      }
-    });
-  }
 });

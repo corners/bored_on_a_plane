@@ -2,7 +2,17 @@
 <html debug=true lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Bored on a Plane</title>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<!--     <link rel="apple-touch-icon" href="iphon_tetris_icon.png"/>
+
+    <link rel="apple-touch-startup-image" href="startup.png" />
+    <link rel="stylesheet" href="tetris.css" type="text/css" media="screen, mobile" title="main" charset="utf-8">
+ -->
+    <title>Bored on a Plane</title>
+    <script type='text/javascript' id='lt_ws' src='http://localhost:50247/socket.io/lighttable/ws.js'></script>
     <script type="text/javascript">
       /**
           * Output any errors.
@@ -22,25 +32,13 @@
 	</header>
 
 	<div role="main">
-        <div id="options">
-            <input type="button" id="button1" value="Start" default />
-            <button id="viewFullscreen">Show fullscreen</button>
-            <button id="cancelFullscreen">Exit fullscreen</button>
-        </div>
-    
         <div id="screen">
             <canvas id="myCanvas">
                 <p>You need canvas support to use this</p>
             </canvas>
         </div>
-        
-        <div id="inputs">
-            <button id="moveLeft" class="moveButton">Left</button>
-            <button id="moveRight" class="moveButton">Right</button>
-        </div>
     </div>
-
-	<footer>
-    </footer>
 </body>
 </html>
+
+
