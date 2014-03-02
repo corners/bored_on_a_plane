@@ -17,22 +17,27 @@ define(
 				this.width = width;
 				this.height = height;
 				this.fillStyle = color;
-				this.velocity = 0; // should be in pixels per second... not there yet
+				this.velocity = 0; // should be in pixels per second
 				this.visible = true;
+				this.lastTimestamp = null; // DOMHighResTimeStamp (in ms)
+				//this.friction = 1.05; // coefficient of friction of aluminium on smooth surface
+				this.force = 0.1; // magnitude of force applied to paddle on keypress in pixels per second
+				// need to model kinetic energy
 			}
 
 			/// Notification
 
 			Paddle.prototype.onKeyPress = function (evt) {
+				
 				switch (evt.keyCode) {
 					// Left arrow.
 					case 37:
-						this.p.x -= 10;
+						this.velocity -= this.force;
 						break;
 
 					// Right arrow.
 					case 39:
-						this.p.x += 10;
+						this.velocity += this.force;
 						break;
 				}
 			}
@@ -92,6 +97,33 @@ define(
 			}
 
 			// End Shape interface
+
+			/**
+			 * @param {timestamp} current timestamp
+			 */
+			Paddle.prototype.move = function(timestamp) {
+				if (this.lastTimestamp === null) {
+					this.lastTimestamp = timestamp;
+				}
+				var t = (timestamp - this.lastTimestamp) / 1000;
+				this.p.x += (this.velocity) * t;
+
+				if (this.p.x < 0) {
+					this.p.x = 0;
+					if (this.velocity < 0) {
+						this.velocity = 0; 
+					}
+				}
+				var leftMax = 620; // todo pass in and calculate from width
+				if (this.p.x > leftMax) {
+					this.p.x = leftMax;
+					if (this.velocity > 0) {
+						this.velocity = 0; 
+					}
+				}
+				// decrease velocity by friction
+				this.velocity -= (0.1 * this.velocity); 
+			}
 
 
 			Paddle.prototype.describe = function () {

@@ -91,6 +91,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
           game.onKeyPress(evt);
         };
       }(this));
+
+
+
     this.ball = null;
 
     // dashboard
@@ -289,7 +292,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     };
   };
 
-  Engine.prototype.move = function () {
+  Engine.prototype.move = function (timestamp) {
     if (this.i === 65535) {
       this.i = 0;
     } else {
@@ -303,6 +306,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.ball.position = result.Line.p1;
     this.ball.velocity = result.Velocity;
 //    trace('posn=('+this.ball.position.x + ', ' + this.ball.position.y+ ')');
+
+    this.paddle.move(timestamp);
   };
 
   Engine.prototype.clear = function () {
@@ -360,12 +365,12 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     }
   };
 
-  Engine.prototype.gameLoop = function (fps) {
+  Engine.prototype.gameLoop = function (fps, timestamp) {
 // todo remember keypreses then notify in handleAction so we calculate everything at once
 //    this.handleAction();
     this.logic();
     if (this.gameState === Engine.INGAME) {
-      this.move();
+      this.move(timestamp);
     }
     this.clear();
     this.draw();
@@ -403,7 +408,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       start = timestamp;
     }
     frames++;
-    engine.gameLoop(fps);
+    engine.gameLoop(fps, timestamp);
     requestAnimationFrame(step);
   }
   requestAnimationFrame(step);

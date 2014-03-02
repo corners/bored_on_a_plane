@@ -1,7 +1,3 @@
-footer {
-	width: 100%;
-}
-
 html:-moz-full-screen {
 	background: red;
 }
@@ -13,7 +9,6 @@ html:-webkit-full-screen {
 html:fullscreen {
 	background: red;
 }
-
 
 canvas#myCanvas {
 	width: 60%;
