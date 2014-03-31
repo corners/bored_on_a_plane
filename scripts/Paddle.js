@@ -20,26 +20,32 @@ define(
 				this.velocity = 0; // should be in pixels per second
 				this.visible = true;
 				this.lastTimestamp = null; // DOMHighResTimeStamp (in ms)
-				//this.friction = 1.05; // coefficient of friction of aluminium on smooth surface
-				this.force = 0.1; // magnitude of force applied to paddle on keypress in pixels per second
-				// need to model kinetic energy
 			}
 
 			/// Notification
 
 			Paddle.prototype.onKeyPress = function (evt) {
-				
+				var force = 0,
+					direction = 0;
+
 				switch (evt.keyCode) {
 					// Left arrow.
 					case 37:
-						this.velocity -= this.force;
+						direction = -1;
 						break;
 
 					// Right arrow.
 					case 39:
-						this.velocity += this.force;
+						direction = 1;
 						break;
 				}
+
+				if (this.velocity === 0) {
+					force = 1;
+				} else {
+					force = 0.2;
+				}
+				this.velocity += (force * direction);
 			}
 
 			/// Shape interface
@@ -121,8 +127,11 @@ define(
 						this.velocity = 0; 
 					}
 				}
+
 				// decrease velocity by friction
 				this.velocity -= (0.1 * this.velocity); 
+			
+				this.lastTimestamp = timestamp;
 			}
 
 

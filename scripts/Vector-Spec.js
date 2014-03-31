@@ -96,26 +96,26 @@ define(
 				expect(R).toEqual(new Vector(-4, -2));
 			});
 
-			// todo - not part of vector
-			it("can determine if two line segments intersect", function () {
-				var p0 = new Vector(4, 7),
-					p1 = new Vector(16, 3),
-					p2 = new Vector(1, 1),
-					p3 = new Vector(17, 10),
-					a = Vector.segmentsIntersect(p0, p1, p2, p3);
+			// // // todo - not part of vector
+			// it("can determine if two line segments intersect", function () {
+			// 	var p0 = new Vector(4, 7),
+			// 		p1 = new Vector(16, 3),
+			// 		p2 = new Vector(1, 1),
+			// 		p3 = new Vector(17, 10),
+			// 		a = Vector.segmentsIntersect(p0, p1, p2, p3);
 
-				expect(a).toEqual(true);
-			});
+			// 	expect(a).toEqual(true);
+			// });
 
-			it("can determine that two line segments do not intersect", function () {
-				var p0 = new Vector(4, 7),
-					p1 = new Vector(16, 3),
-					p2 = new Vector(10, 6),
-					p3 = new Vector(17, 10),
-					a = Vector.segmentsIntersect(p0, p1, p2, p3);
+			// it("can determine that two line segments do not intersect", function () {
+			// 	var p0 = new Vector(4, 7),
+			// 		p1 = new Vector(16, 3),
+			// 		p2 = new Vector(10, 6),
+			// 		p3 = new Vector(17, 10),
+			// 		a = Vector.segmentsIntersect(p0, p1, p2, p3);
 
-				expect(a).toEqual(false);
-			});
+			// 	expect(a).toEqual(false);
+			// });
 
 			it("can calculate a reflection from a diagonal line", function () {
 				// Ball travelling striaght down
@@ -139,7 +139,7 @@ define(
 					p3 = new Vector(17, 10),
 					a = Vector.segmentsIntersectAt(p0, p1, p2, p3);
 
-				expect(a).toEqual(new Vector(8.8, 5.4));
+				expect(a).toEqual(new Vector(8.814, 5.3953));
 			});
 
 			it("can reflect a ball off a line", function () {
@@ -161,7 +161,7 @@ define(
 				var I = b1.subtract(a);
 
 				// reflect the velocity off the line to the destination
-			var v01 = l0.toPoint(l1);
+				var v01 = l0.toPoint(l1);
 				var unitNormal = v01.getUnitNormal();
 				var newVelocity = Vector.reflect(I, unitNormal);
 				var newPosition = a.add(newVelocity);

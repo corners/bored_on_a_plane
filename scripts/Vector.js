@@ -1,4 +1,7 @@
 define(
+    //The name of this module
+    "Vector",
+
     //The array of dependencies
     [],
 
