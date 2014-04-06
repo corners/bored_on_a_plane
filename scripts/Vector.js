@@ -144,7 +144,7 @@ define(
 		};
 
 		Vector.segmentsIntersect = function (p0, p1, p2, p3) {
-			var r = Vector.segmentsIntersect(p0, p1, p2, p3);
+			var r = Vector.segmentsIntersectAt(p0, p1, p2, p3);
 			return r !== null;
 		};
 

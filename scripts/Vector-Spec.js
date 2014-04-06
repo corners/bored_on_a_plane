@@ -96,26 +96,25 @@ define(
 				expect(R).toEqual(new Vector(-4, -2));
 			});
 
-			// // // todo - not part of vector
-			// it("can determine if two line segments intersect", function () {
-			// 	var p0 = new Vector(4, 7),
-			// 		p1 = new Vector(16, 3),
-			// 		p2 = new Vector(1, 1),
-			// 		p3 = new Vector(17, 10),
-			// 		a = Vector.segmentsIntersect(p0, p1, p2, p3);
+			it("can determine if two line segments intersect", function () {
+				var p0 = new Vector(4, 7),
+					p1 = new Vector(16, 3),
+					p2 = new Vector(1, 1),
+					p3 = new Vector(17, 10),
+					a = Vector.segmentsIntersect(p0, p1, p2, p3);
 
-			// 	expect(a).toEqual(true);
-			// });
+				expect(a).toEqual(true);
+			});
 
-			// it("can determine that two line segments do not intersect", function () {
-			// 	var p0 = new Vector(4, 7),
-			// 		p1 = new Vector(16, 3),
-			// 		p2 = new Vector(10, 6),
-			// 		p3 = new Vector(17, 10),
-			// 		a = Vector.segmentsIntersect(p0, p1, p2, p3);
+			it("can determine that two line segments do not intersect", function () {
+				var p0 = new Vector(4, 7),
+					p1 = new Vector(16, 3),
+					p2 = new Vector(10, 6),
+					p3 = new Vector(17, 10),
+					a = Vector.segmentsIntersect(p0, p1, p2, p3);
 
-			// 	expect(a).toEqual(false);
-			// });
+				expect(a).toEqual(false);
+			});
 
 			it("can calculate a reflection from a diagonal line", function () {
 				// Ball travelling striaght down

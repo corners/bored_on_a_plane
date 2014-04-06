@@ -116,15 +116,23 @@ define(
 				expect(result.Line).toEqual(new Line(150, 2, 150, 5));
 			});
 
-//todo
-			// it("takes into account the balls radius when bouncing off a line 4", function () {
-			// 	var ball = new Line(10, 5, 10, 6, 'ball'),
-			// 	 	r = 5,
-			// 		wall = new Line(0, 10, 20, 10, 'wall'),
-			// 		result = wall.bounceWithRadius(ball, r, ball.velocity(), new Vector(-10, -10));
+			it("takes into account the balls radius when bouncing off a line 4", function () {
+				var ball = new Line(10, 5, 10, 6, 'ball'),
+				 	r = 5,
+					wall = new Line(0, 10, 20, 10, 'wall'),
+					result = wall.bounceWithRadius(ball, r, ball.velocity(), new Vector(-10, -10));
 
-			// 	expect(result.Line).toEqual(new Line(10, 5, 10, 6));
-			// });
+				expect(result.Line).toEqual(new Line(10, 5, 10, 4));
+			});
+
+			it("takes into account the balls radius when bouncing off a line 5", function () {
+				var ball = new Line(5, 5, 5, 6, 'ball'),
+				 	r = 5,
+					wall = new Line(1, 10, 10, 10, 'wall'),
+					result = wall.bounceWithRadius(ball, r, ball.velocity(), new Vector(-10, -10));
+
+				expect(result.Line).toEqual(new Line(5, 5, 5, 4));
+			});
 
 		 	it("can extend a perpendicular to another line", function () {
 				var ballLine = new Line(10, 0, 10, 10, 'ball line'),
@@ -145,7 +153,6 @@ define(
 				expect(newPosition).toEqual(new Line(102, 96, 202, 146));
 			});
 
-			// todo
 			// it("can calculate multiple collisions", function () {
 
 			// 	var lines = [
@@ -165,23 +172,21 @@ define(
 			// 	expect(result.Line).toEqual(new Line(25, 18, 33, 18));
 			// });
 
+			// it("can calculate collisions with bottom line", function () {
+			// 	var lines = [
+			// 		// bottom
+			// 		new Line(50, 220, 200, 215, 'bottom'),
+			// 	];
 
-// todo
-			it("can calculate collisions with bottom line", function () {
-				var lines = [
-					// bottom
-					new Line(50, 220, 200, 215, 'bottom'),
-				];
+			// 	var start = new Vector(174, 211);
+			// 	var velocity = new Vector(1.8, -3.2);
+			// 	var radius = 5;
 
-				var start = new Vector(174, 211);
-				var velocity = new Vector(1.8, -3.2);
-				var radius = 5;
+			// 	var result = Line.collideWithLines(start, velocity, radius, lines);
 
-				var result = Line.collideWithLines(start, velocity, radius, lines);
-
-				expect(result.Line).toEqual(new Line(174, 211, 175.8, 207.8));
-				expect(result.Velocity).toEqual(new Vector(1.8, -3.2));
-			});
+			// 	expect(result.Line).toEqual(new Line(174, 211, 175.8, 207.8));
+			// 	expect(result.Velocity).toEqual(new Vector(1.8, -3.2));
+			// });
 		});
 	}
 );
