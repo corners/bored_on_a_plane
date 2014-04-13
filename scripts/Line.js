@@ -138,11 +138,11 @@ define(
 
 			// TODO this goes wrong if the rounding pushes the ball to the otherside of the
 			// line. which then moves the extendTowards in the opposite direction ...maybe
-			var ln = this.extendTowards(line, radius);
-			var result = ln.bounce(line, velocity, lastCollision);
-
-			// var ln = this;
+			// var ln = this.extendTowards(line, radius);
 			// var result = ln.bounce(line, velocity, lastCollision);
+
+			var ln = this;
+			var result = ln.bounce(line, velocity, lastCollision);
 			return result
 		};
 

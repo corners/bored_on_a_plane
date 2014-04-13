@@ -32,8 +32,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   var PADDLE_WIDTH = 80,
       PADDLE_HEIGHT = 8;
   // todo start on paddle and release based on paddle direction and speed
-  var BALL_RADIUS = 3,
-      BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 410),
+  var BALL_RADIUS = 10,
+//      BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 410),
+      BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 210),
       BALL_START_VELOCITY = new Vector(2.5, 3);
 
   function createPaddle(x, y) {
@@ -47,19 +48,19 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
    */
   function createCollidables(shapes) {
     return _.chain(shapes)
-      .map(function (s) {
-        var ols = s.outerLines();
-        return _.map(ols, function (l) {
-          return { line : l, shape : s };
-        });
-      })
-      .flatten()
-      .map(function (ls) {
-        return {
-          line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
-        };
-      })
-      .value();
+              .map(function (s) {
+                var ols = s.outerLines();
+                return _.map(ols, function (l) {
+                  return { line : l, shape : s };
+                });
+              })
+              .flatten()
+              .map(function (ls) {
+                return {
+                  line : ls.line, shape : ls.shape, bb : ls.shape.boundingBox()
+                };
+              })
+              .value();
   }
 
   function Engine(width, height) {
@@ -226,42 +227,57 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 	 * Collides the line the ball will take with the shapes on the screen until its length has been reached.
 	 * Calculates the new velocity based on the reflected collisions.
 	 */
-  Engine.collideWithShapes = function (start, velocity, radius, collidables, lastCollision) {
+  Engine.prototype.collideWithShapes = function (start, velocity, radius, lastCollision) {
     var result,
         initialVelocity = velocity.clone();
 
     var ballLine = Line.calculateLine(start, velocity);
+    var ballRadius = this.ball.radius;
     
     // find lines we could collide with using bounding boxes
     var lineBox = ballLine.boundingBox();
 
     // Returns true if the shape overlaps the bounding box of the ball line
-    var boxesOverlap = function(bb) {
+    var BoxesOverlapFn = function(bb) {
       return bb.shape.isVisible() && (lineBox.intersects(bb.bb) || bb.bb.intersects(lineBox));
     };
-    var bounceOffLine = function(bb) {
+    var BounceOffLineFn = function(bb) {
       return {
-        collision: bb.line.bounceWithRadius(ballLine, radius, initialVelocity, lastCollision),
+        collision: bb.line.bounce(ballLine, initialVelocity, lastCollision),
         shape: bb.shape
       };
     };
-    var hasCollided = function (result) {
+    var HasCollidedFn = function (result) {
       return result.collision !== null
     };
-    var closestCollision = function (result) {
+    var ClosestCollisionFn = function (result) {
       // assume line bouncing furthest means closest collision 
       return result.collision.Line.length();    
     };
+    var ExtendTowardsFn = function (bb) {
+        // Collidable = { line : Line, shape : Shape, bb : Box }
+        var newLine = bb.line.extendTowards(ballLine, ballRadius);
+        return {
+          line: newLine,
+          shape: bb.shape,
+          bb: newLine.boundingBox(),
+        };
+    };
+ 
+    var collidables = this.getCollidables();
 
     var done = false,
         collision;
     while (!done) {
       // Find all lines that collide and choose the closest
-      var collisions = _.chain(collidables)      
-                          .filter(boxesOverlap)
-                          .map(bounceOffLine)
-                          .filter(hasCollided)
-                          .sortBy(closestCollision)
+      var collisions = _.chain(collidables)
+                          .filter(function (bb) {
+                            return bb.shape.isVisible();
+                          })
+                          .map(ExtendTowardsFn)
+                          .map(BounceOffLineFn)
+                          .filter(HasCollidedFn)
+                          .sortBy(ClosestCollisionFn)
                           .value();
       if (collisions.length > 1) {
         // TODO handle two collisions at the same distance
@@ -299,8 +315,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       this.i += 1;
     }
     // Collide with shapes
-    var collidables = this.getCollidables();
-    var result = Engine.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, collidables, this.lastCollision);
+    var result = this.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.lastCollision);
 
     this.lastCollision = result.Collision;
     this.ball.position = result.Line.p1;
