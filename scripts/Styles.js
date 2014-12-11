@@ -15,10 +15,10 @@ define(
 		}
 
 		return {
-			Game: { Fill: '#00a', Stroke: 'white', Font: '10pt sans-serif' },
+			Game: { Fill: 'white', Stroke: 'black', Font: '10pt sans-serif' },
 			Paddle: new Style('silver', 'black'),
 			BlockStyle: {
-				0: new Style('red', 'black')
+				0: new Style('white', 'silver')
 			}
 		};
 	}

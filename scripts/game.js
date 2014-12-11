@@ -29,10 +29,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   var GAME_WIDTH = 640,
       GAME_HEIGHT = 480;
 
-  var PADDLE_WIDTH = 80,
-      PADDLE_HEIGHT = 8;
+  var PADDLE_WIDTH = 70,
+      PADDLE_HEIGHT = 6;
   // todo start on paddle and release based on paddle direction and speed
-  var BALL_RADIUS = 10,
+  var BALL_RADIUS = 4,
 //      BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 410),
       BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 210),
       BALL_START_VELOCITY = new Vector(2.5, 3);
