@@ -74,7 +74,6 @@ define(
 
 		/**
 		 * Called when the ball collides with this object allowing the object to react.
-		 * TODO: pass in point of collision, velocity and object that collided
 		 */
 		Block.prototype.onCollision = function () {
 			if (!this.fixed) {

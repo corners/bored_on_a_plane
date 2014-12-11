@@ -71,8 +71,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.width = width;
     this.height = height;
 
+    // List of functions to call when a key is pressed
     this.keyPressNofifications = [];
-    
+
     // command queue. all commands should have an execute function
     this.commands = [];
 
@@ -153,6 +154,12 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     this.gameState = Engine.INGAME;
     this.lastCollision = new Vector(-100, -100);
+  };
+
+  Engine.prototype.pause = function () {
+    if (this.gameState === Engine.INGAME) {
+      this.gameState = Engine.PAUSED;
+    }
   };
 
   Engine.prototype.togglePauseResume = function () {
@@ -309,7 +316,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
       if (collision) {
         // notify
-        collision.shape.onCollision();
+        this.pushCommand(Commands.makeDestroyShapeCommand(collision.shape));
+//        this.pushCommand(Commands.makePauseCommand(this));
         
         ballLine = collision.collision.Line;
         lineBox = ballLine.boundingBox();
@@ -340,8 +348,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.ball.position = result.Line.p1;
     this.ball.velocity = result.Velocity;
 //    trace('posn=('+this.ball.position.x + ', ' + this.ball.position.y+ ')');
-
-    this.paddle.move(timestamp);
   };
 
   Engine.prototype.clear = function () {

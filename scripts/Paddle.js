@@ -111,9 +111,11 @@ define(
 
 			// End Shape interface
 
+
 			/**
 			 * @param {timestamp} current timestamp
 			 */
+			 /*
 			Paddle.prototype.move = function(timestamp) {
 				if (this.lastTimestamp === null) {
 					this.lastTimestamp = timestamp;
@@ -140,7 +142,7 @@ define(
 			
 				this.lastTimestamp = timestamp;
 			}
-
+			*/
 
 			Paddle.prototype.describe = function () {
 				var s = (new Vector(this.p.x, this.p.y)).describe('p') + ' ' + (new Vector(this.velocity, 0).describe('v'));

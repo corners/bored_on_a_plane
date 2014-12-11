@@ -27,7 +27,7 @@ define(
 					paddle.moveTo(beforeX, beforeY);
 				}
 			};			
-		};
+		}
 
 		Commands.makeTogglePauseCommand = function (game) {
 			return {
@@ -35,7 +35,29 @@ define(
 					game.togglePauseResume();
 				}
 			};			
-		};
+		}
+
+		Commands.makePauseCommand = function (game) {
+			return {
+				execute: function() {
+					game.pause();
+				}
+			};
+		}
+
+		Commands.makeDestroyShapeCommand = function (shape) {
+			var shapeToDestroy;
+			return {
+				execute: function() {
+					shapeToDestroy = shape;
+					shape.onCollision();
+
+				},
+				undo: function() {
+					// todo
+				}
+			};			
+		}
 
 		return Commands;
 	}
