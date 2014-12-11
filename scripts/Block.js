@@ -99,9 +99,6 @@ define(
 				if (this.shrinking) {
 					this.shrink(2);
 				}
-				else if (this.animationStep > 1) {
-					this.animationStep--;
-				}
 			}
 		};
 

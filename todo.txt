@@ -1,7 +1,13 @@
-- blocks
-- debug: arrow for velocity. lenght + direction
 
+# Current
+- command logic
+- move logic and state into a separate class that can be unit tested
+
+# Backlog
+- paddle
+- bounce off corners
+- debug: arrow for velocity. length + direction
 - proper landing page
 - do not run game loop if not in game
-- jslint as a unit test
+- fix unit tests
 
