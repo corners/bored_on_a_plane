@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles'],
-          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles) {
+require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands'],
+          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands) {
 
   "use strict";
 
@@ -37,8 +37,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       BALL_START_POSITION = new Vector((GAME_WIDTH - BALL_RADIUS) / 2, 210),
       BALL_START_VELOCITY = new Vector(2.5, 3);
 
-  function createPaddle(x, y) {
-    return new Paddle('paddle', x, y, PADDLE_WIDTH, PADDLE_HEIGHT, Styles.Paddle.Fill);
+  function createPaddle() {
+    return new Paddle('paddle', 0, 0, PADDLE_WIDTH, PADDLE_HEIGHT, Styles.Paddle.Fill);
   }
 
   /**
@@ -72,6 +72,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.height = height;
 
     this.keyPressNofifications = [];
+    
+    // command queue. all commands should have an execute function
+    this.commands = [];
 
     // colors
     this.backgroundColor = Styles.Game.Fill;
@@ -81,7 +84,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.font = Styles.Game.Font;
 
     // game objects
-    this.paddle = createPaddle(200, 430);//height - 50);
+    this.paddle = createPaddle();
+    this.paddle.moveTo(200, 430);
     this.keyPressNofifications.push(function(shape) { 
         return function (evt) {
           shape.onKeyPress(evt);
@@ -109,6 +113,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     this.lastCollision = new Vector(-100, -100);
     this.gameState = 0;
+  }
+
+  Engine.prototype.pushCommand = function (command) {
+    this.commands.push(command);
   }
 
   /**
@@ -161,7 +169,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     switch (evt.keyCode) {
       // space
       case 32:
-        this.togglePauseResume();
+        //this.togglePauseResume();
+        this.pushCommand(Commands.makeTogglePauseCommand(this));
         break;
     }
   };
@@ -222,6 +231,16 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       this.message = 'game over press space to play again';
     }
   };
+
+  Engine.prototype.processCommands = function () {
+    // todo implement commands as a queue
+    var i, cmd;
+    for (i = 0; i < this.commands.length; i++) {
+      cmd = this.commands[i];
+      cmd.execute();
+    }
+    this.commands = [];
+  }
 
   /**
 	 * Collides the line the ball will take with the shapes on the screen until its length has been reached.
@@ -381,8 +400,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.gameLoop = function (fps, timestamp) {
-// todo remember keypreses then notify in handleAction so we calculate everything at once
-//    this.handleAction();
+    this.processCommands();
     this.logic();
     if (this.gameState === Engine.INGAME) {
       this.move(timestamp);

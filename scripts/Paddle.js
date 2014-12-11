@@ -22,8 +22,15 @@ define(
 				this.lastTimestamp = null; // DOMHighResTimeStamp (in ms)
 			}
 
-			/// Notification
+			Paddle.prototype.moveTo = function (x, y) {
+				this.p.x = x;
+				this.p.y = y;
+			}
 
+			/// Notification
+			Paddle.prototype.onKeyPress = function (evt) {
+			}			
+/*
 			Paddle.prototype.onKeyPress = function (evt) {
 				var force = 0,
 					direction = 0;
@@ -47,7 +54,7 @@ define(
 				}
 				this.velocity += (force * direction);
 			}
-
+*/
 			/// Shape interface
 
 			/**
