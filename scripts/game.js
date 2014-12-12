@@ -176,7 +176,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     switch (evt.keyCode) {
       // space
       case 32:
-        //this.togglePauseResume();
         this.pushCommand(Commands.makeTogglePauseCommand(this));
         break;
     }
@@ -280,12 +279,16 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       // assume line bouncing furthest means closest collision 
       return result.collision.Line.length();    
     };
-    var ExtendTowardsFn = function (bb) {
+    /**
+     * Shift the line towards the ball line to take into account the radius of the ball
+     */
+    var ExtendTowardsFn = function (c) {
         // Collidable = { line : Line, shape : Shape, bb : Box }
-        var newLine = bb.line.extendTowards(ballLine, ballRadius);
+        var offset = ballRadius - 1,
+            newLine = c.line.extendTowards(ballLine, offset);
         return {
           line: newLine,
-          shape: bb.shape,
+          shape: c.shape,
           bb: newLine.boundingBox(),
         };
     };
@@ -297,8 +300,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     while (!done) {
       // Find all lines that collide and choose the closest
       var collisions = _.chain(collidables)
-                          .filter(function (bb) {
-                            return bb.shape.isVisible();
+                          .filter(function (c) {
+                            return c.shape.isVisible();
                           })
                           .map(ExtendTowardsFn)
                           .map(BounceOffLineFn)
@@ -417,38 +420,44 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.drawCenteredText(fps + ' FPS', 0, this.width, 36);
   };
 
-  // Main
-  var engine = new Engine(GAME_WIDTH, GAME_HEIGHT),
-      canvasElem = document.getElementById('myCanvas');
-
-  engine.initialize(window, canvasElem);
-
-  var requestAnimationFrame = window.requestAnimationFrame ||
-      window.mozRequestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      window.msRequestAnimationFrame;
-  window.requestAnimationFrame = requestAnimationFrame;
-
-  var start = null,
-      frames = 0,
-      fps = 0;
-
-  /**
-   * Game loop.
-   * @timestamp {DOMHighResTimeStamp} time in milliseconds at which the repaint is scheduled to occur. 
+  /** 
+   * Main entry point
    */
-  function step(timestamp) {
-    if (start === null) {
-      start = timestamp;
+  function main() {
+    var engine = new Engine(GAME_WIDTH, GAME_HEIGHT),
+        canvasElem = document.getElementById('myCanvas');
+
+    engine.initialize(window, canvasElem);
+
+    var requestAnimationFrame = window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+
+    var start = null,
+        frames = 0,
+        fps = 0;
+
+    /**
+     * Game loop.
+     * @timestamp {DOMHighResTimeStamp} time in milliseconds at which the repaint is scheduled to occur. 
+     */
+    function step(timestamp) {
+      if (start === null) {
+        start = timestamp;
+      }
+      if ((timestamp - start) >= 1000) {
+        fps = frames;
+        frames = 0;
+        start = timestamp;
+      }
+      frames++;
+      engine.gameLoop(fps, timestamp);
+      requestAnimationFrame(step);
     }
-    if ((timestamp - start) >= 1000) {
-      fps = frames;
-      frames = 0;
-      start = timestamp;
-    }
-    frames++;
-    engine.gameLoop(fps, timestamp);
     requestAnimationFrame(step);
   }
-  requestAnimationFrame(step);
+
+  main();
 });

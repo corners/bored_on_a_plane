@@ -96,6 +96,10 @@ define(
 		* Move this line towards the given line by a scalar distance in the direction of the perpendicular.
 		*/
 		Line.prototype.extendTowards = function (line, length) {
+			if (length === 0) {
+				return this;
+			}
+			
 			// extend radius perpendicular to the line we are bouncing off
 			var v, pa, ps, la, ls, offset;
 
