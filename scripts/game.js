@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands'],
-          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands) {
+require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic'],
+          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic) {
 
   "use strict";
 
@@ -64,7 +64,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   }
 
   function Engine(width, height) {
-    this.paused = false;
+    //this.paused = false;
+    this.logic = new Logic();
     this.i = 0;
     this.canvas = null;
     this.context = null;
@@ -99,7 +100,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       }(this));
 
 
-
     this.ball = null;
 
     // dashboard
@@ -113,12 +113,23 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.staticCollidables = createCollidables(this.gameShapes);
 
     this.lastCollision = new Vector(-100, -100);
-    this.gameState = 0;
+    //this.gameState = 0;
+    //this.logic.gameState = 0;
   }
 
   Engine.prototype.pushCommand = function (command) {
     this.commands.push(command);
   }
+
+  Engine.prototype.togglePauseResume = function () {
+    if (this.logic.gameState === Logic.INGAME) {
+      this.logic.gameState = Logic.PAUSED;
+    } else if (this.logic.gameState === Logic.PAUSED) {
+      this.logic.gameState = Logic.INGAME;
+    } else if (this.logic.gameState === Logic.GAMEOVER) {
+      this.startGame(); // todo not supported yet. need to reset paddle rather than remove. need to handle number of lives
+    }
+  };
 
   /**
    * @returns {Collidable[]} array of collidable lines and their associated shapes.
@@ -130,20 +141,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     return dynamicCollidables.concat(this.staticCollidables);
   }
 
-  /**
-	  * Game is over or not started.
-	  */
-  Engine.GAMEOVER = 0;
-  /**
-	  * Game is active and not paused.
-	  */
-  Engine.INGAME = 1;
-  /**
-	  * Game is active but paused.
-	  */
-  Engine.PAUSED = 3;
-
-
   Engine.prototype.startGame = function () {
     this.gameBox = new Box(0, 0, this.width, this.height);
 
@@ -151,25 +148,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     // dashboard
     this.message = '';
+    this.logic.startGame();
 
-    this.gameState = Engine.INGAME;
     this.lastCollision = new Vector(-100, -100);
-  };
-
-  Engine.prototype.pause = function () {
-    if (this.gameState === Engine.INGAME) {
-      this.gameState = Engine.PAUSED;
-    }
-  };
-
-  Engine.prototype.togglePauseResume = function () {
-    if (this.gameState === Engine.INGAME) {
-      this.gameState = Engine.PAUSED;
-    } else if (this.gameState === Engine.PAUSED) {
-      this.gameState = Engine.INGAME;
-    } else if (this.gameState === Engine.GAMEOVER) {
-      this.startGame(); // todo not supported yet. need to reset paddle rather than remove. need to handle number of lives
-    }
   };
 
   Engine.prototype.onKeyPress = function (evt) {
@@ -219,21 +200,23 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       throw 'canvas element required';
     }
 
-    this.gameState = Engine.GAMEOVER;
+    //this.gameState = Engine.GAMEOVER;
   };
 
-  Engine.prototype.logic = function () {
+  Engine.prototype.step = function () {
     var box;
 
-    if (this.gameState === Engine.INGAME) {
+    if (this.logic.inGame()) {
       // game logic
-      box = this.ball.boundingBox();
-      if (!box.inside(this.gameBox)) {
-        this.gameState = Engine.GAMEOVER;
+      if (this.ball) {
+        box = this.ball.boundingBox();
+        if (!box.inside(this.gameBox)) {
+          this.logic.gameOver();
+        }
       }
-    } else if (this.gameState === Engine.PAUSED) {
+    } else if (this.logic.isPaused()) {
       this.message = 'paused';
-    } else if (this.gameState === Engine.GAMEOVER) {
+    } else if (this.logic.isGameOver()) {
       this.message = 'game over press space to play again';
     }
   };
@@ -380,7 +363,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.draw = function () {
-    if (this.gameState === Engine.INGAME) {
+    if (this.logic.inGame()) {
       var lines = [ 'i:' + this.i, 
                     'paddle: ' + this.paddle.describe(),
                     'ball: ' + this.ball.describe()
@@ -410,8 +393,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
   Engine.prototype.gameLoop = function (fps, timestamp) {
     this.processCommands();
-    this.logic();
-    if (this.gameState === Engine.INGAME) {
+    this.step();
+    if (this.logic.inGame()) {
       this.move(timestamp);
     }
     this.clear();

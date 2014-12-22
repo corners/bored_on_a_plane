@@ -1,0 +1,20 @@
+define(
+	// module name
+	"State",
+
+	// dependencies
+	[],//[ 'Vector', 'Box' ],
+
+	//The function to execute when all dependencies have loaded. The arguments
+	//to this function are the array of dependencies mentioned above.
+	function () {    
+		"use strict";
+
+		function State(lives) {
+			this.score = 0;
+			this.lives = lives;
+		}
+
+		return State;
+	}
+);
