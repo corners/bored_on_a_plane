@@ -102,8 +102,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
     this.ball = null;
 
-    // dashboard
-    this.message = '';
+    // // dashboard
+    // this.message = '';
 
     var level = new Level(Styles.BlockStyle[0]);
 
@@ -121,15 +121,14 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.commands.push(command);
   }
 
-  Engine.prototype.togglePauseResume = function () {
-    if (this.logic.gameState === Logic.INGAME) {
-      this.logic.gameState = Logic.PAUSED;
-    } else if (this.logic.gameState === Logic.PAUSED) {
-      this.logic.gameState = Logic.INGAME;
-    } else if (this.logic.gameState === Logic.GAMEOVER) {
-      this.startGame(); // todo not supported yet. need to reset paddle rather than remove. need to handle number of lives
+  Engine.prototype.button1Pressed = function () {
+    if (this.logic.isGameOver()) {
+      this.pushCommand(Commands.makeStartGameCommand(this));
     }
-  };
+    else {
+      this.logic.togglePauseResume();
+    }
+  }
 
   /**
    * @returns {Collidable[]} array of collidable lines and their associated shapes.
@@ -147,7 +146,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.ball = new Ball('main ball', this.paddle.x, this.height - this.paddle.height - 10, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
 
     // dashboard
-    this.message = '';
+//    this.message = '';
     this.logic.startGame();
 
     this.lastCollision = new Vector(-100, -100);
@@ -199,9 +198,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     } else {
       throw 'canvas element required';
     }
-
-    //this.gameState = Engine.GAMEOVER;
-  };
+  }
 
   Engine.prototype.step = function () {
     var box;
@@ -214,12 +211,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
           this.logic.gameOver();
         }
       }
-    } else if (this.logic.isPaused()) {
-      this.message = 'paused';
-    } else if (this.logic.isGameOver()) {
-      this.message = 'game over press space to play again';
     }
-  };
+  }
 
   Engine.prototype.processCommands = function () {
     // todo implement commands as a queue
@@ -363,6 +356,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.draw = function () {
+    // todo move into logic
     if (this.logic.inGame()) {
       var lines = [ 'i:' + this.i, 
                     'paddle: ' + this.paddle.describe(),
@@ -374,9 +368,10 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
       }
     }
 
-    if (this.message !== '') {
+    var message = this.logic.getMessage();
+    if (message !== '') {
       // todo prettify
-      this.drawCenteredText(this.message, 0, this.width, 36);
+      this.drawCenteredText(message, 0, this.width, 36);
     }
 
     if (this.paddle !== null) {

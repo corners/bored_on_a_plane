@@ -26,6 +26,15 @@ define(
 		function Logic() {
 			this.paused = false;
     		this.gameState = Logic.GAMEOVER;
+		    // dashboard
+    		this.message = '';
+		}
+
+		Logic.prototype.setMessage = function (text) {
+			this.message = text;
+		}
+		Logic.prototype.getMessage = function () {
+			return this.message;
 		}
 
 
@@ -33,25 +42,27 @@ define(
 			if (this.gameState === Logic.INGAME) {
 				this.gameState = Logic.PAUSED;
 			}
-		};
+		}
 
-		// Logic.prototype.togglePauseResume = function () {
-		// 	if (this.gameState === Logic.INGAME) {
-		// 		this.gameState = Logic.PAUSED;
-		// 	} else if (this.gameState === Logic.PAUSED) {
-		// 		this.gameState = Logic.INGAME;
-		// 	} else if (this.gameState === Logic.GAMEOVER) {
-		// 		this.startGame(); // todo not supported yet. need to reset paddle rather than remove. need to handle number of lives
-		// 	}
-		// };
+		Logic.prototype.togglePauseResume = function () {
+			if (this.isPaused()) {
+				this.gameState = Logic.INGAME;
+				this.setMessage('');
+			} else if (this.inGame()) {
+				this.gameState = Logic.PAUSED;
+				this.setMessage('paused');
+			}
+		}
 
 		Logic.prototype.startGame = function () {
 			this.gameState = Logic.INGAME;
+			this.setMessage('');
 		}
 
 		Logic.prototype.gameOver = function () {
 	        this.gameState = Logic.GAMEOVER;
-		}
+	        this.setMessage('game over press space to play again');
+	    }
 
 		// todo - remove these
 		Logic.prototype.inGame = function () {

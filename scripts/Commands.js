@@ -14,6 +14,16 @@ define(
 		function Commands() {
 		}
 
+		Commands.makeStartGameCommand = function (game) {
+			return {
+				execute: function() {
+					game.startGame();
+				},
+				undo: function() {
+				}
+			};			
+		}
+
 		Commands.makeMovePaddleCommand = function (paddle, x, y) {
 			var beforeX, beforeY;
 			return {
@@ -32,7 +42,7 @@ define(
 		Commands.makeTogglePauseCommand = function (game) {
 			return {
 				execute: function() {
-					game.togglePauseResume();
+					game.button1Pressed();
 				}
 			};			
 		}
