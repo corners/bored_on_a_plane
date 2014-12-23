@@ -1,13 +1,4 @@
 
 # Current
-- command logic
-- move logic and state into a separate class that can be unit tested
-
-# Backlog
-- paddle
-- bounce off corners
-- debug: arrow for velocity. length + direction
-- proper landing page
-- do not run game loop if not in game
-- fix unit tests
-
+- drawing functions should not be part of the object. move into a visitor
+- move more ingame logic into it's own class

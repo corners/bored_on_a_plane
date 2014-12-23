@@ -17,7 +17,6 @@ define(
 
     }
 
-
     InGame.prototype.move = function (timestamp) {
       if (this.i === 65535) {
         this.i = 0;

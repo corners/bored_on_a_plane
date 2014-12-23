@@ -341,7 +341,6 @@ require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Pad
   };
 
   Engine.prototype.draw = function () {
-    // todo move into logic
     if (this.logic.inGame()) {
       var lines = [ this.inGame.getStatusMsg()[0], 
                     'paddle: ' + this.paddle.describe(),
