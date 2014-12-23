@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic'],
-          function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic) {
+require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic', 'InGame'],
+          function (_, Globals, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic, InGame) {
 
   "use strict";
 
@@ -66,17 +66,19 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   function Engine(width, height) {
     //this.paused = false;
     this.logic = new Logic();
-    this.i = 0;
+    this.inGame = new InGame();
     this.canvas = null;
     this.context = null;
     this.width = width;
     this.height = height;
 
+
+
     // List of functions to call when a key is pressed
     this.keyPressNofifications = [];
 
     // command queue. all commands should have an execute function
-    this.commands = [];
+    //this.commands = [];
 
     // colors
     this.backgroundColor = Styles.Game.Fill;
@@ -117,13 +119,9 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     //this.logic.gameState = 0;
   }
 
-  Engine.prototype.pushCommand = function (command) {
-    this.commands.push(command);
-  }
-
   Engine.prototype.button1Pressed = function () {
     if (this.logic.isGameOver()) {
-      this.pushCommand(Commands.makeStartGameCommand(this));
+      Globals.pushCommand(Commands.makeStartGameCommand(this));
     }
     else {
       this.logic.togglePauseResume();
@@ -156,7 +154,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     switch (evt.keyCode) {
       // space
       case 32:
-        this.pushCommand(Commands.makeTogglePauseCommand(this));
+        Globals.pushCommand(Commands.makeTogglePauseCommand(this));
         break;
     }
   };
@@ -212,16 +210,6 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
         }
       }
     }
-  }
-
-  Engine.prototype.processCommands = function () {
-    // todo implement commands as a queue
-    var i, cmd;
-    for (i = 0; i < this.commands.length; i++) {
-      cmd = this.commands[i];
-      cmd.execute();
-    }
-    this.commands = [];
   }
 
   /**
@@ -295,8 +283,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
 
       if (collision) {
         // notify
-        this.pushCommand(Commands.makeDestroyShapeCommand(collision.shape));
-//        this.pushCommand(Commands.makePauseCommand(this));
+        Globals.pushCommand(Commands.makeDestroyShapeCommand(collision.shape));
+//        Globals.pushCommand(Commands.makePauseCommand(this));
         
         ballLine = collision.collision.Line;
         lineBox = ballLine.boundingBox();
@@ -315,11 +303,8 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.move = function (timestamp) {
-    if (this.i === 65535) {
-      this.i = 0;
-    } else {
-      this.i += 1;
-    }
+    this.inGame.move(timestamp);
+
     // Collide with shapes
     var result = this.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.lastCollision);
 
@@ -358,7 +343,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   Engine.prototype.draw = function () {
     // todo move into logic
     if (this.logic.inGame()) {
-      var lines = [ 'i:' + this.i, 
+      var lines = [ this.inGame.getStatusMsg()[0], 
                     'paddle: ' + this.paddle.describe(),
                     'ball: ' + this.ball.describe()
                   ];
@@ -371,9 +356,13 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     var message = this.logic.getMessage();
     if (message !== '') {
       // todo prettify
-      this.drawCenteredText(message, 0, this.width, 36);
+      this.drawCenteredText(message, 0, this.width, 16);
     }
-
+    message = this.logic.getStatusMsg(0);
+    if (message !== '') {
+      this.drawCenteredText(message, 0, this.width, 36);      
+    }
+  
     if (this.paddle !== null) {
       this.paddle.draw(this.context);
     }
@@ -387,7 +376,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
   };
 
   Engine.prototype.gameLoop = function (fps, timestamp) {
-    this.processCommands();
+    Globals.processCommands();
     this.step();
     if (this.logic.inGame()) {
       this.move(timestamp);
@@ -395,7 +384,7 @@ require(['underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Leve
     this.clear();
     this.draw();
 
-    this.drawCenteredText(fps + ' FPS', 0, this.width, 36);
+    this.logic.setStatusMsg(0, fps + ' FPS');
   };
 
   /** 

@@ -1,13 +1,14 @@
 define(
+	// TODO rename to GameState
 	// module name
 	"Logic",
 
 	// dependencies
-	[ 'underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands' ],
+	[ 'underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'InGame' ],
 
 	//The function to execute when all dependencies have loaded. The arguments
 	//to this function are the array of dependencies mentioned above.
-	function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands) {    
+	function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, InGame) {
 		"use strict";
 
 		/**
@@ -28,6 +29,8 @@ define(
     		this.gameState = Logic.GAMEOVER;
 		    // dashboard
     		this.message = '';
+    		this.statusMsg = [];
+
 		}
 
 		Logic.prototype.setMessage = function (text) {
@@ -37,6 +40,12 @@ define(
 			return this.message;
 		}
 
+		Logic.prototype.setStatusMsg = function (index, text) {
+			this.statusMsg[index] = text;
+		}
+		Logic.prototype.getStatusMsg = function (index) {
+			return this.statusMsg[index];
+		}
 
 		Logic.prototype.pause = function () {
 			if (this.gameState === Logic.INGAME) {
