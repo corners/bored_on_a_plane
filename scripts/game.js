@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic', 'InGame'],
-          function (_, Globals, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic, InGame) {
+require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic', 'InGame', 'DrawVisitor' ],
+          function (_, Globals, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic, InGame, DrawVisitor) {
 
   "use strict";
 
@@ -66,8 +66,8 @@ require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Pad
   function Engine(width, height) {
     //this.paused = false;
     this.logic = new Logic();
+    this.drawVisitor = null;
     this.inGame = new InGame();
-    this.canvas = null;
     this.context = null;
     this.width = width;
     this.height = height;
@@ -174,11 +174,10 @@ require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Pad
     }
 
     if (canvas) {
-      this.canvas = canvas;
       this.context = canvas.getContext('2d');
     }
 
-    if (this.canvas) {
+    if (canvas) {
       if (this.context) {
         // set the dimensions of the coordinate system.
         // the size of the box will be set in CSS and should scale for us
@@ -196,6 +195,8 @@ require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Pad
     } else {
       throw 'canvas element required';
     }
+
+    this.drawVisitor = new DrawVisitor(canvas.getContext('2d'), this.Styles);
   }
 
   Engine.prototype.step = function () {
@@ -363,14 +364,14 @@ require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Pad
     }
   
     if (this.paddle !== null) {
-      this.paddle.draw(this.context);
+      this.paddle.accept(this.drawVisitor);
     }
     if (this.ball !== null) {
-      this.ball.draw(this.context);
+      this.ball.accept(this.drawVisitor);
     }
 
     for (var i = 0; i < this.gameShapes.length; i++) {
-      this.gameShapes[i].draw(this.context);
+      this.gameShapes[i].accept(this.drawVisitor);
     }
   };
 

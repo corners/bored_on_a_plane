@@ -190,31 +190,35 @@ define(
 			}
 		}
 
+
+		Line.prototype.accept = function(visitor) {
+			visitor.visitLine(this);
+		}
 		/**
 		 * Tells the object to draw itself on the canvas.
 		 * @param {context} display context to use for drawing.
 		 */
-		Line.prototype.draw = function (context) {
-			var oldColor;
+		// Line.prototype.draw = function (context) {
+		// 	var oldColor;
 
-			if (this.visible) {
-				context.beginPath();
-				context.moveTo(this.p0.x, this.p0.y);
-				context.lineTo(this.p1.x, this.p1.y);
-				context.lineWidth = this.width;
-				oldColor = context.strokeStyle;
-				context.strokeStyle = this.strokeStyle;
-				context.stroke();
-				context.strokeStyle = oldColor;
-			}
-			if (this.animationStep === 1) {
-				this.strokeStyle = this.colour;
-				this.visible = this.fixed;
-			}
-			else if (this.animationStep > 1) {
-				this.animationStep--;
-			}
-		}
+		// 	if (this.visible) {
+		// 		context.beginPath();
+		// 		context.moveTo(this.p0.x, this.p0.y);
+		// 		context.lineTo(this.p1.x, this.p1.y);
+		// 		context.lineWidth = this.width;
+		// 		oldColor = context.strokeStyle;
+		// 		context.strokeStyle = this.strokeStyle;
+		// 		context.stroke();
+		// 		context.strokeStyle = oldColor;
+		// 	}
+		// 	if (this.animationStep === 1) {
+		// 		this.strokeStyle = this.colour;
+		// 		this.visible = this.fixed;
+		// 	}
+		// 	else if (this.animationStep > 1) {
+		// 		this.animationStep--;
+		// 	}
+		// }
 
 		// End Shape interface
 

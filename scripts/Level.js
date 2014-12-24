@@ -55,19 +55,19 @@ define(
 		 */
 		Level.prototype.getLayout = function (width, height) {
 
-	    // Define borders
-	    var shapes = [
-	      // top
-	      new Line(50, 50, width-50, 50, { name: 'top' }),
-	      // bottom
-	      new Line(50, height - 5, width-50, height - 5, { name: 'bottom' }),
-	      // left
-	      new Line(50, 0, 50, height, { name: 'left' }),
-	      // right
-	      new Line(width-50, 0, width-50, height, { name: 'right' }),
-	    ];
+		    // Define borders
+		    var shapes = [
+		      // top
+		      new Line(50, 50, width-50, 50, { name: 'top' }),
+		      // bottom
+		      new Line(50, height - 5, width-50, height - 5, { name: 'bottom' }),
+		      // left
+		      new Line(50, 0, 50, height, { name: 'left' }),
+		      // right
+		      new Line(width-50, 0, width-50, height, { name: 'right' }),
+		    ];
 
-	    // add bricks
+		    // add bricks
 			var bricks = this.createGrid(10, 8, 95, 70, 36, 16, { fixed : false, fillStyle : this.fillStyle, strokeStyle: this.strokeStyle });
 
 		  return shapes.concat(bricks);

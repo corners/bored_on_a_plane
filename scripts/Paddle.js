@@ -92,22 +92,26 @@ define(
 				// this.fillStyle = 'orange';
 			}
 
+			Paddle.prototype.accept = function(visitor) {
+				visitor.visitPaddle(this);
+			}
+
 			/**
 			 * Tells the object to draw itself on the canvas.
 			 * @param {context} display context to use for drawing.
 			 */
-			Paddle.prototype.draw = function (context) {
-				context.fillStyle = this.fillStyle;
-				context.globalAlpha = 1.0;
-				context.beginPath();
-				context.moveTo(this.p.x, this.p.y);
-				context.lineTo(this.p.x + this.width, this.p.y);
-				context.lineTo(this.p.x + this.width, this.p.y + this.height);
-				context.lineTo(this.p.x, this.p.y + this.height);
-				context.lineTo(this.p.x, this.p.y);
-				context.closePath();
-				context.fill();
-			}
+			// Paddle.prototype.draw = function (context) {
+			// 	context.fillStyle = this.fillStyle;
+			// 	context.globalAlpha = 1.0;
+			// 	context.beginPath();
+			// 	context.moveTo(this.p.x, this.p.y);
+			// 	context.lineTo(this.p.x + this.width, this.p.y);
+			// 	context.lineTo(this.p.x + this.width, this.p.y + this.height);
+			// 	context.lineTo(this.p.x, this.p.y + this.height);
+			// 	context.lineTo(this.p.x, this.p.y);
+			// 	context.closePath();
+			// 	context.fill();
+			// }
 
 			// End Shape interface
 

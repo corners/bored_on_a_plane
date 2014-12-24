@@ -26,13 +26,16 @@ define(
 		  return this.position.add(this.velocity);
 		};
 
-		Ball.prototype.draw = function (context) {
-			context.fillStyle = this.color;
-			context.beginPath();
-			context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, true);
-			context.closePath();
-			context.fill();
-		};
+		// Ball.prototype.draw = function (context) {
+		// 	context.fillStyle = this.color;
+		// 	context.beginPath();
+		// 	context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, true);
+		// 	context.closePath();
+		// 	context.fill();
+		// };
+		Ball.prototype.accept = function (visitor) {
+			visitor.visitBall(this);
+		}
 
 		/**
 		 * Describe current state
