@@ -49,6 +49,7 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     // fonts
     this.font = Styles.Game.Font;
 
+    // TODO eventd
     // this.keyPressNofifications.push(function(shape) { 
     //     return function (evt) {
     //       shape.onKeyPress(evt);
@@ -59,14 +60,14 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
           game.onKeyPress(evt);
         };
       }(this));
-
-
-    // // dashboard
-    // this.message = '';
-
-    //this.gameState = 0;
-    //this.logic.gameState = 0;
   }
+
+  Engine.prototype.startGame = function () {
+    this.inGame.start();
+    this.logic.startGame();
+  };
+
+  var BUTTON_1 = 32; // Space
 
   Engine.prototype.button1Pressed = function () {
     if (this.logic.isGameOver()) {
@@ -76,13 +77,6 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
       this.logic.togglePauseResume();
     }
   }
-
-  Engine.prototype.startGame = function () {
-    this.inGame.start();
-    this.logic.startGame();
-  };
-
-  var BUTTON_1 = 32; // Space
 
   Engine.prototype.onKeyPress = function (evt) {
     switch (evt.keyCode) {
@@ -145,10 +139,10 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     this.inGame.move(timestamp);
   };
 
-  Engine.prototype.clear = function () {
-    this.context.fillStyle  = this.backgroundColor;
-    this.context.fillRect(0, 0, this.width, this.height);
-  };
+  // Engine.prototype.clear = function () {
+    // this.context.fillStyle  = this.backgroundColor;
+    // this.context.fillRect(0, 0, this.width, this.height);
+  // };
 
   Engine.prototype.drawText = function (value, x, y) {
     this.context.fillStyle = this.textColor;
@@ -172,6 +166,7 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
   };
 
   Engine.prototype.draw = function () {
+    this.inGame.visitShapes(this.drawVisitor);
 
     if (this.logic.inGame()) {
       // todo this should be all part of in game statuses
@@ -194,8 +189,6 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     if (message !== '') {
       this.drawCenteredText(message, 0, this.width, 36);      
     }
-  
-    this.inGame.visitShapes(this.drawVisitor);
   };
 
   Engine.prototype.gameLoop = function (fps, timestamp) {
@@ -204,7 +197,6 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     if (this.logic.inGame()) {
       this.move(timestamp);
     }
-    this.clear();
     this.draw();
 
     this.logic.setStatusMsg(0, fps + ' FPS');

@@ -82,42 +82,12 @@ define(
 			}
 		}
 
-		/**
-		 * Tells the object to draw itself on the canvas.
-		 * @param {context} display context to use for drawing.
-		 */
-		// Block.prototype.draw = function(context) {
-		// 	if (this.visible) {
-		// 		context.beginPath();
-		// 		context.rect(this.p.x, this.p.y, this.width, this.height);
-		// 		context.fillStyle = this.fillStyle;
-		// 		context.strokeStyle = this.strokeStyle;
-		// 		context.fill();
-		// 		context.lineWidth = this.lineWidth;
-		// 		context.stroke();
-
-		// 		if (this.shrinking) {
-		// 			this.shrink(2);
-		// 		}
-		// 	}
-		// };
-
 		Block.prototype.accept = function(visitor) {
 			visitor.visitBlock(this);
 		}
 
 		// End Shape interface
 
-
-		/**
-		  * Bounce the line off this shape.
-		  * Assume the line describes the trajectory of a circle with the given radius.
-		  * Return null if no collision occurs
-		  */
-/*		Block.prototype.bounceWithRadius = function (line, radius, velocity, lastCollision) {
-				return null;  // shouldnt get here. box should resolve to series of lines
-		};
-*/
 		return Block;
 	}
 );

@@ -19,6 +19,13 @@ define(
 			//this.bottomRight = new Vector(x1, y1);
 		}
 
+		Box.prototype.width = function () {
+			return this.x2 - this.x1;
+		}
+
+		Box.prototype.height = function () {
+			return this.y2 - this.y1;
+		}
 		// returns true if this box is fully inside the the given box
 		Box.prototype.inside = function (box) {
 			return (this.x1 >= box.x1 && this.y1 >= box.y1 && this.x2 <= box.x2 && this.y2 <= box.y2);
@@ -45,6 +52,12 @@ define(
 			return (rectA.x1 <= rectB.x2 && rectA.x2 >= rectB.x1 &&
 		   		rectA.y1 <= rectB.y2 && rectA.y2 >= rectB.y1); 
 		};
+
+
+		Box.prototype.accept = function(visitor) {
+			visitor.visitBox(this);
+		}
+
 		return Box;
 	}
 );

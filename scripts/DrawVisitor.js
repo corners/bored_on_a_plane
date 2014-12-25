@@ -43,6 +43,11 @@ define(
 			this.ctx.stroke();
 		}
 
+		DrawVisitor.prototype.visitBox = function (box) {
+		    this.ctx.fillStyle  = Styles.Game.Fill;//this.backgroundColor;
+		    this.ctx.fillRect(box.x1, box.y1, box.width(), box.height());
+		}
+
 		DrawVisitor.prototype.visitBlock = function (block) {
 			if (block.visible) {
 				this.ctx.beginPath();

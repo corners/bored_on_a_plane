@@ -76,6 +76,11 @@ define(
     }
 
     InGame.prototype.visitShapes = function (visitor) {
+
+      if (this.gameBox !== null) {
+        this.gameBox.accept(visitor);
+      }
+
       if (this.paddle !== null) {
         this.paddle.accept(visitor);
       }
