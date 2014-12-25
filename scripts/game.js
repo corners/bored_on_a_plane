@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'Logic', 'InGame', 'DrawVisitor' ],
-          function (_, Globals, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, Logic, InGame, DrawVisitor) {
+require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'DrawVisitor' ],
+          function (_, Globals, Styles, Commands, Logic, InGame, DrawVisitor) {
 
   "use strict";
 
