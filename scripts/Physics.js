@@ -1,7 +1,7 @@
 define(
   // module name
 
-  "InGame",
+  "Physics",
 
   // dependencies
   [ 'underscore', 'Globals', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Commands', 'Styles' ],
@@ -30,7 +30,7 @@ define(
       return new Paddle('paddle', 0, 0, PADDLE_WIDTH, PADDLE_HEIGHT, Styles.Paddle.Fill);
     }
 
-    function InGame(width, height) {
+    function Physics(width, height) {
       this.i = 0;
       this.width = width;
       this.height = height;
@@ -47,7 +47,7 @@ define(
     }
 
     // todo this really should be a static that creates an in-game class
-    InGame.prototype.start = function () {
+    Physics.prototype.start = function () {
       var level = new Level(Styles.BlockStyle[0]);
 
       this.gameShapes = level.getLayout(this.width, this.height);
@@ -62,20 +62,22 @@ define(
       this.paddle.moveTo(200, 430);
 
       this.tryAgain();
-      // this.ball = new Ball('main ball', this.paddle.x, this.height - this.paddle.height - 10, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
-      // this.lastCollision = new Vector(-100, -100);
     }
 
     /**
      * the game has started but the player has failed. This resets the ball and lets the user try again.
      */
-    InGame.prototype.tryAgain = function () {
+    Physics.prototype.tryAgain = function () {
       //this.ball = new Ball('main ball', this.width * 0.5, (this.height - this.paddle.height - 10), BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
       this.ball = new Ball('main ball', -1, -1, BALL_START_POSITION, BALL_START_VELOCITY, BALL_RADIUS);
       this.lastCollision = new Vector(-100, -100);
     }
 
-    InGame.prototype.visitShapes = function (visitor) {
+    Physics.prototype.destroyBall = function () {
+      this.ball = null;
+    }
+
+    Physics.prototype.visitShapes = function (visitor) {
 
       if (this.gameBox !== null) {
         this.gameBox.accept(visitor);
@@ -118,7 +120,7 @@ define(
     /**
      * @returns {Collidable[]} array of collidable lines and their associated shapes.
      */
-    InGame.prototype.getCollidables = function () {
+    Physics.prototype.getCollidables = function () {
       var dynamics = [ this.paddle ];
       var dynamicCollidables = createCollidables(dynamics);
 
@@ -130,7 +132,7 @@ define(
      * Collides the line the ball will take with the shapes on the screen until its length has been reached.
      * Calculates the new velocity based on the reflected collisions.
      */
-    InGame.prototype.collideWithShapes = function (start, velocity, radius, lastCollision) {
+    Physics.prototype.collideWithShapes = function (start, velocity, radius, lastCollision) {
       var result,
           initialVelocity = velocity.clone();
 
@@ -216,9 +218,11 @@ define(
       };
     };
 
+    Physics.prototype.hasBallLeftGameArea = function () {
+      return this.ball && !this.ball.boundingBox().inside(this.gameBox);
+    }
 
-
-    InGame.prototype.move = function (timestamp) {
+    Physics.prototype.step = function (timestamp) {
       if (this.i === 65535) {
         this.i = 0;
       } else {
@@ -226,33 +230,36 @@ define(
       }
 
       // Collide with shapes
-      var result = this.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.lastCollision);
-
-      this.lastCollision = result.Collision;
-      this.ball.position = result.Line.p1;
-      this.ball.velocity = result.Velocity;
-    }
-
-
-    InGame.prototype.step = function (logic) {
-      var box;
-      
       if (this.ball) {
-        box = this.ball.boundingBox();
-        if (!box.inside(this.gameBox)) {
-          // TODO event not command
-          Globals.pushCommand(Commands.makePlayerDiedCommand(logic));
-        }
+        var result = this.collideWithShapes(this.ball.position, this.ball.velocity, this.ball.radius, this.lastCollision);
+
+        this.lastCollision = result.Collision;
+        this.ball.position = result.Line.p1;
+        this.ball.velocity = result.Velocity;
       }
     }
 
 
-    InGame.prototype.getStatusMsg = function () {
+    // Physics.prototype.step = function (logic) {
+    //   var box;
+      
+    //   if (this.ball) {
+    //     box = this.ball.boundingBox();
+    //     if (!box.inside(this.gameBox)) {
+    //       // TODO event not command
+    //       Globals.pushCommand(Commands.makePlayerDiedCommand(logic));
+    //       this.ball = null;
+    //     }
+    //   }
+    // }
+
+
+    Physics.prototype.getStatusMsg = function () {
       return [ 
         'i:' + this.i,
         ];
     }
 
-    return InGame;
+    return Physics;
   }
 );

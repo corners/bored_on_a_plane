@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'DrawVisitor' ],
-          function (_, Globals, Styles, Commands, Logic, InGame, DrawVisitor) {
+require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'Physics', 'DrawVisitor' ],
+          function (_, Globals, Styles, Commands, Logic, Physics, DrawVisitor) {
 
   "use strict";
 
@@ -34,7 +34,7 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     //this.paused = false;
     this.logic = new Logic();
     this.drawVisitor = null;
-    this.inGame = new InGame(width, height);
+    this.physics = new Physics(width, height);
     this.context = null;
     this.width = width;
     this.height = height;
@@ -63,7 +63,7 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
   }
 
   Engine.prototype.startGame = function () {
-    this.inGame.start();
+    this.physics.start();
     this.logic.startGame();
   };
 
@@ -130,19 +130,13 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
 
   Engine.prototype.step = function () {
     if (this.logic.inGame()) {
-      // game logic
-      this.inGame.step(this.logic);
+      // game logic TODO move to Logic
+      if (this.physics.hasBallLeftGameArea()) {
+          this.logic.playerDied();
+          this.physics.destroyBall();
+      }
     }
   }
-
-  Engine.prototype.move = function (timestamp) {
-    this.inGame.move(timestamp);
-  };
-
-  // Engine.prototype.clear = function () {
-    // this.context.fillStyle  = this.backgroundColor;
-    // this.context.fillRect(0, 0, this.width, this.height);
-  // };
 
   Engine.prototype.drawText = function (value, x, y) {
     this.context.fillStyle = this.textColor;
@@ -166,13 +160,13 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
   };
 
   Engine.prototype.draw = function () {
-    this.inGame.visitShapes(this.drawVisitor);
+    this.physics.visitShapes(this.drawVisitor);
 
     if (this.logic.inGame()) {
-      // todo this should be all part of in game statuses
-      var lines = [ this.inGame.getStatusMsg()[0], 
-                    'paddle: ' + this.inGame.paddle.describe(),
-                    'ball: ' + this.inGame.ball.describe()
+      // todo this should be all part of in game statuses. have some wqay to map each status to a part of the screen
+      var lines = [ this.physics.getStatusMsg()[0], 
+                    'paddle: ' + this.physics.paddle.describe(),
+                    'ball: ' + this.physics.ball.describe()
                   ];
       var height = 14;
       for (var i = 0; i < lines.length; i++) {
@@ -195,7 +189,7 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'InGame', 'Draw
     Globals.processCommands();
     this.step();
     if (this.logic.inGame()) {
-      this.move(timestamp);
+      this.physics.step(timestamp);
     }
     this.draw();
 

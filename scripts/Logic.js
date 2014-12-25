@@ -4,11 +4,11 @@ define(
 	"Logic",
 
 	// dependencies
-	[ 'underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands', 'InGame' ],
+	[ 'underscore', 'Vector', 'Line', 'Box', 'Block', 'Ball', 'Paddle', 'Level', 'Styles', 'Commands' ],
 
 	//The function to execute when all dependencies have loaded. The arguments
 	//to this function are the array of dependencies mentioned above.
-	function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands, InGame) {
+	function (_, Vector, Line, Box, Block, Ball, Paddle, Level, Styles, Commands) {
 		"use strict";
 
 		/**
