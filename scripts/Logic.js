@@ -31,6 +31,7 @@ define(
     		this.message = '';
     		this.statusMsg = [];
 
+    		this.gameOver();
 		}
 
 		Logic.prototype.setMessage = function (text) {
@@ -70,7 +71,7 @@ define(
 
 		Logic.prototype.gameOver = function () {
 	        this.gameState = Logic.GAMEOVER;
-	        this.setMessage('game over press space to play again');
+	        this.setMessage('press Button1 play again');
 	    }
 
 		// todo - remove these
@@ -84,6 +85,10 @@ define(
 
 		Logic.prototype.isGameOver = function () {
 			return this.gameState === Logic.GAMEOVER;
+		}
+
+		Logic.prototype.playerDied = function () {
+			this.gameOver();
 		}
 
 		return Logic;

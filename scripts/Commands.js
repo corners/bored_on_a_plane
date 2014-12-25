@@ -24,6 +24,14 @@ define(
 			};			
 		}
 
+		Commands.makePlayerDiedCommand = function (logic) {
+			return {
+				execute: function () {
+					logic.playerDied();
+				}
+			};
+		}
+
 		Commands.makeMovePaddleCommand = function (paddle, x, y) {
 			var beforeX, beforeY;
 			return {

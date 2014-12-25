@@ -11,6 +11,7 @@ define(
 		"use strict";
 
 		// todo properly
+	    // command queue. all commands should have an execute function
 		var commandQueue = [];
 		return {
 			pushCommand : function (cmd) {
