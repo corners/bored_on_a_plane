@@ -46,6 +46,20 @@ define(
       this.gameShapes = [];
     }
 
+    Physics.prototype.getDebugInfo = function () {
+      var lines = [ 
+        this.getStatusMsg()[0]
+      ];
+      // scope for a DescribeShapesVisitor here that does nothing for most shapes
+      if (this.paddle) {
+        lines.push('paddle: ' + this.paddle.describe());
+      } 
+      if (this.ball) {
+        lines.push('ball: ' + this.ball.describe());
+      }
+      return lines;
+    }
+
     // todo this really should be a static that creates an in-game class
     Physics.prototype.start = function () {
       var level = new Level(Styles.BlockStyle[0]);

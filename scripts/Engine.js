@@ -11,8 +11,8 @@ require.config({
 
 
 // Start the main app logic.
-require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'Physics', 'DrawVisitor' ],
-          function (_, Globals, Styles, Commands, Logic, Physics, DrawVisitor) {
+require(['underscore', 'Globals', 'Vector', 'Styles', 'Commands', 'Logic', 'Physics', 'DrawVisitor' ],
+          function (_, Globals, Vector, Styles, Commands, Logic, Physics, DrawVisitor) {
 
   "use strict";
 
@@ -128,13 +128,18 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'Physics', 'Dra
     this.drawVisitor = new DrawVisitor(canvas.getContext('2d'), this.Styles);
   }
 
-  Engine.prototype.step = function () {
+  Engine.prototype.updateGameState = function (timestamp) {
     if (this.logic.inGame()) {
       // game logic TODO move to Logic
       if (this.physics.hasBallLeftGameArea()) {
           this.logic.playerDied();
+          // tie this to an event
           this.physics.destroyBall();
       }
+    }
+
+    if (this.logic.inGame()) {
+      this.physics.step(timestamp);
     }
   }
 
@@ -159,20 +164,20 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'Physics', 'Dra
     this.context.fillText(value, x, y);
   };
 
-  Engine.prototype.draw = function () {
-    this.physics.visitShapes(this.drawVisitor);
-
-    if (this.logic.inGame()) {
-      // todo this should be all part of in game statuses. have some wqay to map each status to a part of the screen
-      var lines = [ this.physics.getStatusMsg()[0], 
-                    'paddle: ' + this.physics.paddle.describe(),
-                    'ball: ' + this.physics.ball.describe()
-                  ];
+  Engine.prototype.drawLines = function(p, lines) {
       var height = 14;
       for (var i = 0; i < lines.length; i++) {
         this.drawText(lines[i], 0, height * i);
       }
-    }
+  }
+
+
+  Engine.prototype.draw = function () {
+    this.physics.visitShapes(this.drawVisitor);
+
+    var debugMsg = new Vector(0, 14);
+
+    this.drawLines(debugMsg, this.physics.getDebugInfo());
 
     var message = this.logic.getMessage();
     if (message !== '') {
@@ -187,10 +192,9 @@ require(['underscore', 'Globals', 'Styles', 'Commands', 'Logic', 'Physics', 'Dra
 
   Engine.prototype.gameLoop = function (fps, timestamp) {
     Globals.processCommands();
-    this.step();
-    if (this.logic.inGame()) {
-      this.physics.step(timestamp);
-    }
+
+    this.updateGameState(timestamp);
+
     this.draw();
 
     this.logic.setStatusMsg(0, fps + ' FPS');
