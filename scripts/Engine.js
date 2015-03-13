@@ -10,12 +10,17 @@ require.config({
 });
 
 
+// this is the game engine. it collects the parts together but doesn't really understand anything
+
 // Start the main app logic.
 require(['underscore', 'Globals', 'Vector', 'Styles', 'Commands', 'Logic', 'Physics', 'DrawVisitor' ],
-          function (_, Globals, Vector, Styles, Commands, Logic, Physics, DrawVisitor) {
+
+function (_, Globals, Vector, Styles, Commands, Logic, Physics, DrawVisitor) {
 
   "use strict";
 
+  var GAME_WIDTH = 640,
+      GAME_HEIGHT = 480;
   var LOG_TRACE = 5;
   var LogLevel = 0;//LOG_TRACE; // increasing level means increasing detail
 
@@ -26,15 +31,11 @@ require(['underscore', 'Globals', 'Vector', 'Styles', 'Commands', 'Logic', 'Phys
   }
 
 
-  var GAME_WIDTH = 640,
-      GAME_HEIGHT = 480;
-
-
   function Engine(width, height) {
     //this.paused = false;
-    this.logic = new Logic();
-    this.drawVisitor = null;
     this.physics = new Physics(width, height);
+    this.logic = new Logic(this.physics);
+    this.drawVisitor = null;
     this.context = null;
     this.width = width;
     this.height = height;
@@ -62,28 +63,29 @@ require(['underscore', 'Globals', 'Vector', 'Styles', 'Commands', 'Logic', 'Phys
       }(this));
   }
 
-  Engine.prototype.startGame = function () {
-    this.physics.start();
-    this.logic.startGame();
-  };
+  // Engine.prototype.startGame = function () {
+  //   this.physics.start();
+  //   this.logic.startGame();
+  // };
 
   var BUTTON_1 = 32; // Space
 
-  Engine.prototype.button1Pressed = function () {
-    if (this.logic.isGameOver()) {
-      Globals.pushCommand(Commands.makeStartGameCommand(this));
-    }
-    else {
-      this.logic.togglePauseResume();
-    }
-  }
+  // Engine.prototype.button1Pressed = function () {
+  //   if (this.logic.isGameOver()) {
+  //     Globals.pushCommand(Commands.makeStartGameCommand(this));
+  //   }
+  //   else {
+  //     this.logic.togglePauseResume();
+  //   }
+  // }
 
   Engine.prototype.onKeyPress = function (evt) {
     switch (evt.keyCode) {
       // space
       case BUTTON_1:
         //Globals.pushCommand(Commands.makeTogglePauseCommand(this));
-        this.button1Pressed();
+        //this.button1Pressed();
+        this.logic.button1Pressed();
         break;
     }
   };
@@ -236,6 +238,7 @@ require(['underscore', 'Globals', 'Vector', 'Styles', 'Commands', 'Logic', 'Phys
       engine.gameLoop(fps, timestamp);
       requestAnimationFrame(step);
     }
+    
     requestAnimationFrame(step);
   }
 
